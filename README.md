@@ -1,105 +1,170 @@
-# New Nx Repository
+# AI-Ready Nx Workspace
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A template Nx monorepo pre-configured for AI-assisted software development. It provides an agent-agnostic governance framework, a tiered SDLC pipeline, and the scaffolding needed so that any AI coding agent (Claude, Codex, Gemini, or others) can operate consistently within a well-defined architecture.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Why This Exists
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-## Try the full Nx platform
-🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/setup/connect-workspace/guide). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
-## Generate a library
+AI coding agents are powerful, but without guardrails they tend to:
+
+- Duplicate or contradict architectural decisions across agent-specific config files.
+- Invent their own conventions instead of following the ones already in the repo.
+- Skip quality gates because no machine-readable pipeline tells them otherwise.
+
+This workspace solves those problems by establishing a **single source of truth** that every agent and human contributor consumes.
+
+## Authority Order
+
+All agents and contributors must follow this strict precedence:
+
+| Priority | Source | Purpose |
+| -------- | ------ | ------- |
+| 1 | **Nx project graph** | Canonical system architecture and dependency boundaries |
+| 2 | **`/docs`** | Repository-internal documentation (architecture, requirements, ADRs, diagrams) |
+| 3 | **`/.ai`** | Shared AI governance: context, roles, standards, tasks, prompts, workflows |
+| 4 | **Agent folders** (`.claude/`, `.codex/`, `.gemini/`) | Implementation adapters only -- must not duplicate or override architecture |
+
+> Agents consume architecture. They do not redefine it.
+
+## Repository Structure
+
+```
+.
+├── .ai/                    # Shared AI governance layer
+│   ├── context/            # Workspace context and Nx concept mappings
+│   ├── roles/              # Agent role definitions (architect, implementer, reviewer, QA, BA)
+│   ├── standards/          # Coding, architecture, testing, security, review standards
+│   ├── tasks/              # Executable task templates (implement-feature, create-library, ...)
+│   ├── prompts/            # Phase-specific SDLC prompt templates
+│   └── workflows/          # Tiered SDLC pipeline orchestration
+├── docs/                   # Project documentation
+│   ├── adr/                # Architectural Decision Records
+│   ├── architecture/       # System architecture documentation
+│   ├── diagrams/           # Mermaid and visual diagrams
+│   └── requirements/       # Business and functional requirements
+├── packages/               # Nx projects (apps and libs)
+├── AGENTS.md               # Agent governance entry point (Codex/Gemini adapter)
+├── CLAUDE.md               # Claude-specific adapter
+├── nx.json                 # Nx workspace configuration
+├── tsconfig.base.json      # Shared TypeScript configuration
+└── pnpm-workspace.yaml     # pnpm workspace definition
+```
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (LTS recommended)
+- [pnpm](https://pnpm.io/)
+
+### Installation
 
 ```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+pnpm install
 ```
 
-## Run tasks
-
-To build the library use:
+### Common Commands
 
 ```sh
-npx nx build pkg1
+# Visualize the project graph
+pnpm nx graph
+
+# Run a task for a project
+pnpm nx <target> <project>
+
+# Run tasks for all affected projects
+pnpm nx affected -t <target>
+
+# Sync TypeScript project references
+pnpm nx sync
 ```
 
-To run any task with Nx use:
+## AI Governance Framework
 
-```sh
-npx nx <target> <project-name>
-```
+The `/.ai` directory is the core of what makes this workspace "AI-ready". It defines a shared, agent-agnostic layer that any AI tool can consume.
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Roles
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Predefined agent personas that map to SDLC responsibilities:
 
-## Versioning and releasing
+| Role | File | Responsibility |
+| ---- | ---- | -------------- |
+| Architect | `roles/architect.md` | System design, boundary enforcement, ADRs |
+| Business Analyst | `roles/business-analyst.md` | Requirements analysis, acceptance criteria |
+| Implementer | `roles/implementer.md` | Code authoring following standards |
+| Reviewer | `roles/reviewer.md` | Code review, security, maintainability |
+| QA | `roles/qa.md` | Test strategy, validation, quality gates |
 
-To version and release the library use
+### Standards
 
-```
-npx nx release
-```
+Shared rules that apply to all agents and contributors, covering: coding conventions, architecture alignment, Nx boundary enforcement, testing, security, documentation, review process, ADR format, CI/CD, release management, and onboarding.
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+See [`.ai/standards/`](.ai/standards/) for the full set.
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Task Templates
 
-## Keep TypeScript project references up to date
+Standardized, executable task definitions that agents follow when performing common operations: implementing features, creating libraries/apps, validating architecture, running tests, reviewing PRs, managing releases, and more.
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+See [`.ai/tasks/`](.ai/tasks/) for the full set.
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
+### SDLC Pipeline
 
-```sh
-npx nx sync
-```
+Work flows through a tiered pipeline with quality gates between each phase:
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+| Phase | Lead Agent | Purpose |
+| ----- | ---------- | ------- |
+| Analyze | Business Analyst | Understand requirements, resolve ambiguity |
+| Design | Architect | Define files, interfaces, data flow |
+| Implement | Specialist | Write code, tests, documentation |
+| Review | Reviewer | Verify correctness, security, maintainability |
+| Test | QA Engineer | Integration, accessibility, performance testing |
+| Security | Security Engineer | Threat analysis (complex tasks only) |
+| Deploy | DevOps Engineer | Ship to verifiable environment |
+| Verify | Business Analyst | Confirm acceptance criteria met |
 
-```sh
-npx nx sync:check
-```
+Three tiers control which phases are active:
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+- **Light** (1--2 SP) -- 4 phases: Analyze, Implement, Review, Verify
+- **Standard** (3 SP) -- 6 phases: adds Design and Test
+- **Complex** (5--8 SP) -- all 8 phases: adds Security and Deploy
 
-## Nx Cloud
+See [`.ai/workflows/`](.ai/workflows/) for pipeline definitions and decision gates.
 
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+## Agent Adapters
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Each supported AI agent has an adapter file at the repo root that wires it into the shared governance layer:
 
-### Set up CI (non-Github Actions CI)
+| File | Agent | Purpose |
+| ---- | ----- | ------- |
+| `CLAUDE.md` | Claude Code | Claude-specific Nx instructions |
+| `AGENTS.md` | Codex / Gemini / others | Shared agent governance + Nx guidelines |
 
-**Note:** This is only required if your CI provider is not GitHub Actions.
+These adapters reference `/.ai` for roles, standards, and tasks. They must not duplicate or override the shared definitions.
 
-Use the following command to configure a CI workflow for your workspace:
+## Nx Workspace Details
 
-```sh
-npx nx g ci-workflow
-```
+- **Package manager**: pnpm
+- **Build system**: SWC via `@nx/js`
+- **TypeScript**: Composite project references with strict mode
+- **Task inference**: Targets are inferred by the `@nx/js/typescript` plugin
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Nx Concepts in This Workspace
 
-## Install Nx Console
+| Nx Concept | Maps To |
+| ---------- | ------- |
+| apps | Deployable units (services, frontends, APIs) |
+| libs | Domain modules (business logic, shared utilities) |
+| tags | Architectural boundaries between domains |
+| project graph | Canonical system architecture |
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## Documentation
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+The `/docs` directory follows a structured layout for project documentation:
 
-## Useful links
+- **`adr/`** -- Architectural Decision Records using [MADR](https://adr.github.io/madr/) format
+- **`architecture/`** -- System overviews, component breakdowns, technology rationale
+- **`diagrams/`** -- Mermaid diagrams as authoritative system views
+- **`requirements/`** -- Business, functional, and non-functional requirements
 
-Learn more:
+## License
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+[MIT](LICENSE)
