@@ -137,6 +137,8 @@ Each supported AI agent has an adapter file at the repo root that wires it into 
 | ---- | ----- | ------- |
 | `CLAUDE.md` | Claude Code | Claude-specific Nx instructions |
 | `AGENTS.md` | Codex / Gemini / others | Shared agent governance + Nx guidelines |
+| `.cursor/` | Cursor | Cursor commands and subagents |
+| `.opencode/`, `opencode.json` | opencode | opencode commands, agents, and Nx MCP server |
 
 These adapters reference `/.ai` for roles, standards, and tasks. They must not duplicate or override the shared definitions.
 
