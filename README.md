@@ -1,5 +1,7 @@
 # AI-Ready Nx Workspace
 
+[![CI](https://github.com/codeaiforge/ai-ready-nx-workspace/actions/workflows/ci.yml/badge.svg)](https://github.com/codeaiforge/ai-ready-nx-workspace/actions/workflows/ci.yml)
+
 A template Nx monorepo pre-configured for AI-assisted software development. It provides an agent-agnostic governance framework, a tiered SDLC pipeline, and the scaffolding needed so that any AI coding agent (Claude, Codex, Gemini, or others) can operate consistently within a well-defined architecture.
 
 ## Why This Exists
