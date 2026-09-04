@@ -37,7 +37,8 @@ All agents and contributors must follow this strict precedence:
 │   ├── standards/          # Coding, architecture, testing, security, review standards
 │   ├── tasks/              # Executable task templates (implement-feature, create-library, ...)
 │   ├── prompts/            # Phase-specific SDLC prompt templates
-│   └── workflows/          # Tiered SDLC pipeline orchestration
+│   ├── workflows/          # Tiered SDLC pipeline orchestration
+│   └── sprints/            # Agent-written execution records (task outputs, retrospectives)
 ├── docs/                   # Project documentation
 │   ├── adr/                # Architectural Decision Records
 │   ├── architecture/       # System architecture documentation
