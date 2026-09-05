@@ -172,13 +172,13 @@ The orchestrator (this agent) passes artifacts between sub-agents and checks eac
 
 | Layer | Primary Role File |
 | ----- | ----------------- |
-| `monorepo`, `frontend`, `api`, `auth` | `roles/implementer.md` |
-| `database` | `roles/database-engineer.md` |
-| `ai` | `roles/ai-engineer.md` |
-| `infra`, `ci` | `roles/devops.md` |
-| `testing` | `roles/qa.md` |
+| `monorepo`, `frontend`, `api`, `auth` | `.ai/roles/implementer.md` |
+| `database` | `.ai/roles/database-engineer.md` |
+| `ai` | `.ai/roles/ai-engineer.md` |
+| `infra`, `ci` | `.ai/roles/devops.md` |
+| `testing` | `.ai/roles/qa.md` |
 
-For `auth` layer, also consult `roles/security-engineer.md` in an advisory capacity.
+For `auth` layer, also consult `.ai/roles/security-engineer.md` in an advisory capacity.
 
 **Guide**: `.ai/prompts/implement.md`
 **Standards**: `.ai/standards/coding.md`, `.ai/standards/testing.md`
@@ -438,7 +438,7 @@ Update `docs/specs/sprint-{N}-progress.md`:
 3. Update the Current Wave pointer
 4. Set `**Last updated**` to today's date
 
-If the progress file does not exist yet, create it following the format of `docs/specs/sprint-0-progress.md`.
+If the progress file does not exist yet, create it from `docs/specs/sprint-progress-template.md`.
 
 ### 6c. Present Summary
 
