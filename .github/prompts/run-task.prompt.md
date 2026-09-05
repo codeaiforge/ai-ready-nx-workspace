@@ -31,6 +31,10 @@ Read `docs/specs/implementation-roadmap.md` and find the task row matching the t
 
 Also read `docs/specs/mvp-requirements.md` to resolve the Trace column to full requirement text.
 
+### Load Stack Profile
+
+Read `docs/specs/stack.md` — the active stack profile. It defines the language/framework commands and per-layer conventions this pipeline invokes by reference (validation, data access, migrations, access control, module structure, auth, dependency audit, deploy). Wherever a phase below names a concrete command or convention, use the value from the stack profile. If a referenced field is marked `N/A`, skip that check. If `docs/specs/stack.md` is missing, **STOP** and ask the user to create it from `docs/specs/stack-template.md`.
+
 ### Load Lessons Learned
 
 Read all existing task output files in `.ai/sprints/sprint-{N}/tasks/*.md` (where N is the target sprint). For each file, extract the **Human Interventions** section and compile a list of lessons. These lessons are corrections from prior task executions and **must** be applied during this task's pipeline — repeating a previously corrected mistake is a pipeline failure.
@@ -149,7 +153,7 @@ The orchestrator (this agent) passes artifacts between sub-agents and checks eac
 2. Consult `docs/architecture/` for relevant ADRs and design patterns
 3. Read `.ai/standards/architecture.md` and `.ai/standards/nx-boundaries.md`
 4. Identify all files to create or modify — with full paths
-5. Define interfaces, Zod schemas, or contracts at component boundaries
+5. Define interfaces, schemas, or contracts at component boundaries using the stack profile's **Validation / contracts** mechanism
 6. Map data flow (consider a Mermaid sequence diagram for Complex tier)
 7. Verify Nx boundary compliance — which `scope:*` tags are involved
 8. Define test strategy (what to test, where, fixtures needed)
@@ -186,22 +190,22 @@ For `auth` layer, also consult `.ai/roles/security-engineer.md` in an advisory c
 **Input**: Task Brief (Light tier) or Design Spec (Standard/Complex tier)
 
 1. **Read first** — read all relevant existing source files before changing anything
-2. **Scaffold** — use `pnpm nx g` for new files/projects where applicable
+2. **Scaffold** — use the stack profile's **Scaffold** command for new libs/modules where applicable
 3. **Build** — implement following the spec. Respect:
    - `.ai/standards/coding.md` for code conventions
    - `.ai/standards/nx-boundaries.md` for module boundaries
-   - FSD layer structure for frontend components
+   - the stack profile's **Module / layer structure** for the relevant layer
 4. **Test** — write co-located tests at tier-appropriate depth:
-   - **Light**: minimal — contract validation (Zod schema validates, export resolves, component renders)
+   - **Light**: minimal — contract validation per the stack profile's **Validation / contracts** mechanism (schema validates, export resolves)
    - **Standard**: unit tests for all non-trivial logic
    - **Complex**: unit + integration tests; fixture-based tests for AI pipelines
-5. **Domain-specific checks**:
-   - AI pipelines: test against reference fixtures in `__fixtures__/`, verify schema conformance
-   - Database: run migration locally, verify with `supabase status`
-   - Frontend: verify FSD layer compliance, check barrel exports
-6. **Validate** — run `pnpm nx affected -t lint,test,build`
+5. **Domain-specific checks** (apply those whose layer conventions are defined in the stack profile; skip `N/A`):
+   - AI pipelines: test against reference fixtures at the stack's **Test fixtures location**, verify schema conformance
+   - Database: run migration and verify per the stack's **Migrations + verify**
+   - Frontend: verify the stack's **Module / layer structure** compliance, check module exports
+6. **Validate** — run the stack profile's **Affected lint/test/build** command
 
-**Quality Gate**: `pnpm nx affected -t lint,test,build` must pass.
+**Quality Gate**: the stack's **Affected lint/test/build** command must pass.
 
 If the gate fails:
 
@@ -246,7 +250,7 @@ If the gate fails:
 
 **Output**: Review Report — use the format defined in `.ai/prompts/review-code.md`
 
-**Quality Gate**: Zero Blockers remaining. `pnpm nx affected -t lint,test,build` still green after any fixes.
+**Quality Gate**: Zero Blockers remaining. The stack's **Affected lint/test/build** command still green after any fixes.
 
 **On Blockers**:
 
@@ -267,12 +271,12 @@ Each blocker-fix round is a separate commit — present a fresh commit plan and 
 **Standards**: `.ai/standards/testing.md`
 
 1. Verify test coverage meets expectations from the Design Spec test strategy
-2. Domain-specific validation:
+2. Domain-specific validation (apply those defined for this stack; skip `N/A`):
    - **AI pipeline**: run against reference fixtures, check schema conformance rate (target >95%), test failure modes and fallback behavior
    - **Frontend**: accessibility audit — keyboard navigation, aria labels, color independence, focus management
-   - **API**: integration test with local Supabase
-   - **Database**: migration rollback test, RLS policy verification
-3. Run `pnpm nx affected -t test`
+   - **API**: integration test via the stack's **Integration test harness**
+   - **Database**: migration rollback test and **Access control** verification per the stack
+3. Run the stack's **Affected tests only** command
 4. For Complex tier: exploratory testing against acceptance criteria
 
 **Output**: Test Report — use the format defined in `.ai/prompts/test-feature.md`
@@ -299,17 +303,17 @@ Each blocker-fix round is a separate commit — present a fresh commit plan and 
 2. **OWASP Top 10** — check changeset against relevant categories
 3. **AI-specific** (for `ai` layer):
    - Prompt injection surface analysis
-   - Output validation via Zod schema
+   - Output validation via the stack's **Validation / contracts** mechanism
    - Data leakage in system prompts or logs
 4. **Database-specific** (for `database` layer):
-   - RLS policy covers all CRUD operations for new tables
-   - Cascade delete behavior verified
-   - All queries through Drizzle ORM (no raw SQL)
+   - **Access control** policy (per stack) covers all CRUD operations for new tables
+   - Cascade / delete behavior verified
+   - All data access through the stack's **Data access** layer (no raw/unsafe queries)
 5. **Auth-specific** (for `auth` layer):
-   - Session management is Supabase-native
+   - Session management follows the stack's **Auth mechanism**
    - OAuth redirect URIs scoped correctly
-   - Token handling follows Supabase best practices
-6. **Dependency audit**: run `pnpm audit` — no known vulnerabilities in new dependencies
+   - Token handling follows the stack's **Auth mechanism** best practices
+6. **Dependency audit**: run the stack's **Dependency vulnerability audit** command — no known vulnerabilities in new dependencies
 
 **Output**: Security Assessment — use the format defined in `.ai/prompts/security-assess.md`
 
@@ -324,10 +328,10 @@ Each blocker-fix round is a separate commit — present a fresh commit plan and 
 Follow the PR conventions in `.github/git-workflow.md`:
 
 1. Ensure all changes are committed and pushed to the feature branch
-2. Open a PR using the squash-merge conventions (PR title = commit message format)
-3. Confirm Vercel preview deployment is triggered
-4. Verify the feature is accessible and functional at the preview URL
-5. Once CI is green and the preview is verified, squash merge into `main`
+2. Open a PR using the stack's **Merge strategy** (PR title = commit message format)
+3. Confirm the stack's **Deploy — Target** preview is triggered
+4. Verify the feature is accessible/functional per the stack's **Preview / verify gate**
+5. Once CI is green and the preview is verified, merge into `main` per the stack's **Merge strategy**
 6. Delete the feature branch
 
 **Quality Gate**: PR merged. Production deploy succeeds. CI green on `main`.
