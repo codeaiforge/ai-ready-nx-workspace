@@ -329,7 +329,7 @@ Follow the PR conventions in `.github/git-workflow.md`:
 
 1. Ensure all changes are committed and pushed to the feature branch
 2. Open a PR using the stack's **Merge strategy** (PR title = commit message format)
-3. Confirm the stack's **Deploy — Target** preview is triggered
+3. Confirm the stack's **Target** preview is triggered
 4. Verify the feature is accessible/functional per the stack's **Preview / verify gate**
 5. Once CI is green and the preview is verified, merge into `main` per the stack's **Merge strategy**
 6. Delete the feature branch
