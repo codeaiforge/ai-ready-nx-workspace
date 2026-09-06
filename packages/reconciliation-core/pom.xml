@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.1.1</version>
+		<relativePath/>
+		<!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.codeaiforge.reconciliation</groupId>
+	<artifactId>reconciliation-core</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>reconciliation-core</name>
+	<description>Demo project for Spring Boot</description>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>25</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>2.44.5</version>
+				<configuration>
+					<formats>
+						<!-- you can define as many formats as you want, each is independent -->
+						<format>
+							<!-- define the files to apply to -->
+							<includes>
+								<include>*.md</include>
+								<include>.gitignore</include>
+							</includes>
+							<!-- define the steps to apply to those files -->
+							<trimTrailingWhitespace/>
+							<endWithNewline/>
+							<indent>
+								<tabs>true</tabs>
+								<spacesPerTab>4</spacesPerTab>
+							</indent>
+						</format>
+					</formats>
+					<java>
+						<!-- to customize, go to https://github.com/diffplug/spotless/tree/main/plugin-maven#java -->
+						<!-- Use the default importOrder configuration -->
+						<importOrder/>
+						<!-- Clean up -->
+						<removeUnusedImports/>
+						<!-- Apply google-java-format formatter -->
+						<googleJavaFormat><version>1.28.0</version></googleJavaFormat>
+					</java>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
