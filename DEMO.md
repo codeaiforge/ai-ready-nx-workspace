@@ -59,7 +59,13 @@ prompts name no Spring, Maven, or Postgres anywhere; they resolve through
 
 ## If you do want to run it
 
-Prerequisites, exact versions in [`.tool-versions`](.tool-versions):
+The zero-install path is the devcontainer: open the branch in GitHub Codespaces, or
+"Reopen in Container" in VS Code. It installs JDK 25, Node 20, pnpm and Docker-in-Docker
+(needed by Testcontainers), and mirrors what CI installs, so a container run and a CI run
+agree.
+
+To run it on your own machine instead, the prerequisites — exact versions in
+[`.tool-versions`](.tool-versions):
 
 - **JDK 25** — the poms compile with `release 25`
 - **Node 20+ and pnpm** — Nx is the build and impact engine

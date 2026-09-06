@@ -1,0 +1,48 @@
+{
+  "name": "Payment Reconciliation Demo",
+
+  // Mirrors .github/workflows/ci.yml so a container run and a CI run agree.
+  // Versions are kept in step with .tool-versions.
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+
+  "features": {
+    // JDK 25 — the poms compile with release 25. Formatting also needs it:
+    // older google-java-format calls a javac internal removed after 21.
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "25",
+      "jdkDistro": "tem",
+      "installMaven": false
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "pnpmVersion": "9"
+    },
+    // Testcontainers starts a real Postgres for the service's integration test,
+    // so the container needs its own Docker daemon.
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "postCreateCommand": "pnpm install --frozen-lockfile",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "nrwl.angular-console",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic"
+      }
+    }
+  },
+
+  // Testcontainers pulls images and Maven resolves from Central on first run.
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+
+  "remoteUser": "vscode"
+}
