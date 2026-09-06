@@ -1,0 +1,23 @@
+{
+  "name": "reconciliation-service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/reconciliation-service/src",
+  "tags": [],
+  "implicitDependencies": ["reconciliation-core"],
+  "targets": {
+    "check-format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./mvnw -q spotless:check",
+        "cwd": "packages/reconciliation-service"
+      }
+    },
+    "apply-format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./mvnw -q spotless:apply",
+        "cwd": "packages/reconciliation-service"
+      }
+    }
+  }
+}
