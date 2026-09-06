@@ -76,6 +76,14 @@ To run it on your own machine instead, the prerequisites — exact versions in
 - **JDK 25** — the poms compile with `release 25`
 - **Node 20+ and pnpm** — Nx is the build and impact engine
 - **Docker running** — the service's integration test starts a real Postgres via Testcontainers
+- **`osv-scanner`** — only for the dependency audit, which the security phase runs for tasks
+  touching the `auth`, `database` or `ai` layers:
+
+  ```bash
+  curl -sL -o ~/.local/bin/osv-scanner \
+    https://github.com/google/osv-scanner/releases/download/v2.5.1/osv-scanner_linux_amd64
+  chmod +x ~/.local/bin/osv-scanner
+  ```
 
 ```bash
 pnpm install

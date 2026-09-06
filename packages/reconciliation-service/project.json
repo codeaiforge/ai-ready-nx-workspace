@@ -23,6 +23,7 @@
       "options": {
         "cwd": "packages/reconciliation-service",
         "commands": [
+          "command -v osv-scanner >/dev/null 2>&1 || { echo 'ERROR: osv-scanner not on PATH. It backs the dependency audit in docs/specs/stack.md. Install: curl -sL -o ~/.local/bin/osv-scanner https://github.com/google/osv-scanner/releases/download/v2.5.1/osv-scanner_linux_amd64 && chmod +x ~/.local/bin/osv-scanner  (the devcontainer installs it for you)' >&2; exit 1; }",
           "./mvnw -q org.cyclonedx:cyclonedx-maven-plugin:makeAggregateBom",
           "osv-scanner scan source --lockfile target/bom.json"
         ],
