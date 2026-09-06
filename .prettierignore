@@ -4,6 +4,10 @@
 /.nx/cache
 /.nx/workspace-data
 
+# Lockfiles are tool-owned; reformatting them causes needless churn and conflicts.
+pnpm-lock.yaml
+
+
 # Generated per run, never authored: the gate's local output and the memory index.
 # `nx format:check --all` walks the filesystem, so a git-ignored directory is still
 # format-checked unless it is named here.
