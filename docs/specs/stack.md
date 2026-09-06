@@ -18,13 +18,13 @@ Spring/Java specifics. Place at `docs/specs/stack.md` on the Java demo branch.
 The pipeline calls these by name. Each executor runs the embedded `./mvnw`/`./gradlew`
 (add `--ignoreWrapper` in CI to use a preinstalled `mvn`/`gradle`).
 
-| Purpose                              | Command                                                                                                                                                                                                     |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Scaffold new lib/module              | `nx g @nxrocks/nx-spring-boot:project <path> --projectType application\|library --buildSystem maven-project --javaVersion 25 --dependencies <comma-list>` (add `--proxyUrl <url>` behind a corporate proxy) |
-| Link a dependency edge               | `nx g @nxrocks/nx-spring-boot:link --sourceProjectName <app> --targetProjectName <lib>`                                                                                                                     |
-| Affected lint/test/build (main gate) | `nx affected -t check-format,test,build`                                                                                                                                                                    |
-| Affected tests only                  | `nx affected -t test`                                                                                                                                                                                       |
-| Dependency vulnerability audit       | `nx affected -t dependency-check` (OWASP dependency-check Maven/Gradle goal wired as an Nx target; not an nx-spring-boot executor)                                                                          |
+| Purpose                              | Command                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scaffold new lib/module              | `nx g @nxrocks/nx-spring-boot:project <path> --projectType application\|library --buildSystem maven-project --javaVersion 25 --dependencies <comma-list>` (add `--proxyUrl <url>` behind a corporate proxy)                                                                                                                                                                                                   |
+| Link a dependency edge               | `nx g @nxrocks/nx-spring-boot:link --sourceProjectName <app> --targetProjectName <lib>`                                                                                                                                                                                                                                                                                                                       |
+| Affected lint/test/build (main gate) | `nx affected -t check-format,test,build`                                                                                                                                                                                                                                                                                                                                                                      |
+| Affected tests only                  | `nx affected -t test`                                                                                                                                                                                                                                                                                                                                                                                         |
+| Dependency vulnerability audit       | `nx affected -t dependency-check` — generates a CycloneDX SBOM then scans it with `osv-scanner`. Scans the full transitive tree; a direct-dependency scan misses most Java CVEs. Exits non-zero on findings. Human-gated at Phase 6 of Complex-tier tasks, deliberately **not** part of the CI gate: an unfixable upstream CVE would pin the build red and remove the accept/mitigate decision from the human |
 
 > `build` auto-runs the `install` executor on dependency libraries first (publishes their jar to
 > `~/.m2`), so inter-service dependencies resolve without a manual step.
@@ -44,15 +44,16 @@ The pipeline calls these by name. Each executor runs the embedded `./mvnw`/`./gr
 
 ## Deploy
 
-| Field                 | Value                                                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Target                | OCI image via `nx run <service>:build-image` (`spring-boot:build-image` / `bootBuildImage`), pushed to the container registry |
-| Preview / verify gate | Image deployed to the staging namespace; smoke test the service's health/actuator endpoint                                    |
-| Merge strategy        | Squash-merge to `main`                                                                                                        |
+| Field                 | Value                                                                                                                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Target                | OCI image via `nx run <service>:build-image` (Cloud Native Buildpacks). Built locally; no registry is configured — pushing is out of scope, see docs/architecture/overview.md |
+| Preview / verify gate | `docker compose up -d --wait` (service + Postgres, see compose.yaml), then `curl -fsS localhost:8080/actuator/health`, then `docker compose down -v`                          |
+| Merge strategy        | Squash-merge to `main`                                                                                                                                                        |
 
 ## Notes
 
-- **Prerequisites** the pipeline assumes present: **JDK 25** on PATH, a running
+- **Prerequisites** the pipeline assumes present: **JDK 25** on PATH, `osv-scanner` for the
+  dependency audit (Complex tier only), a running
   **Docker** daemon (Testcontainers backs the integration tests), and — only when generating
   new projects — network reachability to `start.spring.io` (use `--proxyUrl` / `HTTP(S)_PROXY`
   inside a bank network). Formatting needs Spotless >= 2.44 with an explicitly pinned

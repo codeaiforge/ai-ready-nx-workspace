@@ -1,0 +1,41 @@
+# Deploy verify gate for the SDLC pipeline's Phase 7 (see docs/specs/stack.md).
+#
+# The service cannot boot alone: Flyway and JPA both need a database at startup. This brings
+# up Postgres alongside the image built by `nx run reconciliation-service:build-image`, so
+# the gate can prove the artefact actually runs rather than merely compiles.
+#
+#   pnpm exec nx run reconciliation-service:build-image
+#   docker compose up -d --wait
+#   curl -fsS localhost:8080/actuator/health
+#   docker compose down -v
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: reconciliation
+      POSTGRES_USER: reconciliation
+      POSTGRES_PASSWORD: reconciliation
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U reconciliation']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  reconciliation-service:
+    # Tag produced by spring-boot:build-image, which defaults to <artifactId>:<version>.
+    image: reconciliation-service:0.0.1-SNAPSHOT
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/reconciliation
+      SPRING_DATASOURCE_USERNAME: reconciliation
+      SPRING_DATASOURCE_PASSWORD: reconciliation
+    ports:
+      - '8080:8080'
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS localhost:8080/actuator/health || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
