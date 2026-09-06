@@ -5,7 +5,7 @@
 #
 #   reconciliation-core     (library)     — pure domain: Money value objects, matching engine
 #   reconciliation-service  (application) — Spring Boot: ingestion API, JPA/Flyway, audit, security
-#   service --link--> core
+#   service --depends on--> core  (via the Maven <dependency>; no implicit edge)
 #
 # Uses @nxrocks/nx-spring-boot (verified loading on Nx 22.5.1). Generation calls
 # Spring Initializr (start.spring.io), so this needs:
@@ -89,19 +89,11 @@ else
     --dependencies "web,validation,data-jpa,security,flyway,postgresql" $PROXY_ARG --no-interactive
 fi
 
-# The link generator writes `implicitDependencies` onto the TARGET project, naming the
-# SOURCE — i.e. target depends on source, the inverse of how the schema description reads.
-# So to get `service depends on core`, core is the source and service is the target.
-# It touches project.json only, never the pom, and re-running duplicates the entry —
-# so guard on the edge already being present.
-if grep -q "reconciliation-core" packages/reconciliation-service/project.json 2>/dev/null; then
-  echo "==> link already present, skipping"
-else
-  echo "==> link the service to the shared library (creates the Nx dependency edge)"
-  pnpm exec nx g @nxrocks/nx-spring-boot:link \
-    --sourceProjectName reconciliation-core --targetProjectName reconciliation-service \
-    --no-interactive
-fi
+# The `link` generator is deliberately NOT used. It writes `implicitDependencies` into
+# project.json, which asserts a graph edge independently of the build. Once the Maven
+# <dependency> below exists, @nxrocks/nx-spring-boot infers a `static` edge from the pom —
+# and keeping both means a removed Maven dependency would leave the implicit edge still
+# claiming a relationship the code no longer has. One source of truth: the pom.
 
 # --- make the formatter work on a modern JDK ---
 #
@@ -126,10 +118,10 @@ fi
 
 # --- make the dependency REAL at the Maven level ---
 #
-# The `link` generator only writes `implicitDependencies` into project.json — an Nx-graph
-# assertion. Without a <dependency> in the service pom, `nx affected` ripples but the
-# service cannot actually import core's classes, so the demo would show orchestration
-# without real code reuse. Nx runs core's `install` target first, publishing its jar.
+# This is the ONLY declaration of the dependency. @nxrocks/nx-spring-boot reads the pom and
+# infers a `static` graph edge from it, so `nx affected` ripples and the service can import
+# core's classes — one fact, not two that can disagree. Nx runs core's `install` target
+# first, publishing its jar so the service can resolve it.
 
 if grep -q "reconciliation-core" packages/reconciliation-service/pom.xml; then
   echo "==> Maven dependency on core already present, skipping"
@@ -402,6 +394,6 @@ Seed complete.
   - Build ripple:   pnpm exec nx affected -t build --base=HEAD
   - Run the service: pnpm exec nx serve reconciliation-service
 
-If `affected` does NOT show both projects, the implicit link did not register —
-verify the edge in `nx graph` before building the demo on top of it.
+If `affected` does NOT show both projects, the pom dependency did not produce a graph edge —
+verify it with `nx graph --focus=reconciliation-service` before building the demo on top.
 NOTE

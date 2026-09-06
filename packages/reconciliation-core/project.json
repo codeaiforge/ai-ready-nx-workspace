@@ -17,6 +17,17 @@
         "command": "./mvnw -q spotless:apply",
         "cwd": "packages/reconciliation-core"
       }
+    },
+    "dependency-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/reconciliation-core",
+        "commands": [
+          "./mvnw -q org.cyclonedx:cyclonedx-maven-plugin:makeAggregateBom",
+          "osv-scanner scan source --lockfile target/bom.json"
+        ],
+        "parallel": false
+      }
     }
   }
 }

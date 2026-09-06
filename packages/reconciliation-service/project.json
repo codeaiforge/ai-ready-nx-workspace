@@ -3,7 +3,6 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/reconciliation-service/src",
   "tags": [],
-  "implicitDependencies": ["reconciliation-core"],
   "targets": {
     "check-format": {
       "executor": "nx:run-commands",
@@ -17,6 +16,17 @@
       "options": {
         "command": "./mvnw -q spotless:apply",
         "cwd": "packages/reconciliation-service"
+      }
+    },
+    "dependency-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/reconciliation-service",
+        "commands": [
+          "./mvnw -q org.cyclonedx:cyclonedx-maven-plugin:makeAggregateBom",
+          "osv-scanner scan source --lockfile target/bom.json"
+        ],
+        "parallel": false
       }
     }
   }
