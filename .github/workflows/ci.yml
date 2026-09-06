@@ -1,9 +1,12 @@
 name: CI
 
+# Demo-branch CI. This file intentionally diverges from `main`: main's workspace is
+# stack-agnostic, this branch carries the Java/Spring demo and needs a JDK.
 on:
   push:
     branches:
       - main
+      - 'demo/**'
   pull_request:
 
 permissions:
@@ -30,11 +33,27 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      # JDK 25 (current LTS), kept in sync with .tool-versions — the source of truth for
+      # local runs and the devcontainer. Requires Spotless >= 2.44 with an explicitly
+      # pinned google-java-format: the formatter bundled with older Spotless calls a
+      # javac internal that changed after 21 and dies with NoSuchMethodError on 25.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
       - run: pnpm install --frozen-lockfile
+
+      # Docker is preinstalled on ubuntu-latest runners, which is what the service's
+      # Testcontainers-backed integration test needs. No extra setup required.
 
       # Nx Cloud (start-ci-run / record / fix-ci) removed: needs an unconfigured
       # token, and a red Actions tab during a demo undercuts the pitch.
       - run: pnpm exec nx format:check --base=origin/main
-      - run: pnpm exec nx affected -t lint test build typecheck --base=origin/main
-      # NB: affected across an empty workspace is a no-op and exits 0. Once
-      # packages/ has projects, these targets do real work.
+
+      # The gate named in docs/specs/stack.md. run-many rather than affected: this
+      # branch diverges permanently from main, so `affected --base=origin/main` would
+      # mark everything affected on every run anyway. The affected/ripple behaviour is
+      # proved by scripts/seed-java.sh instead.
+      - run: pnpm exec nx run-many -t check-format,test,build
