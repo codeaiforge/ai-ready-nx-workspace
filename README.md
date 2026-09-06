@@ -4,6 +4,8 @@
 
 A template Nx monorepo pre-configured for AI-assisted software development. It provides an agent-agnostic governance framework, a tiered SDLC pipeline, and the scaffolding needed so that any AI coding agent (Claude, Codex, Gemini, or others) can operate consistently within a well-defined architecture.
 
+> **Worked example** — [`demo/java-spring-payment-reconciliation`](https://github.com/codeaiforge/ai-ready-nx-workspace/tree/demo/java-spring-payment-reconciliation) runs this framework end to end on a Java 25 / Spring Boot 4 stack, driving an entirely non-TypeScript toolchain through the same pipeline. See [DEMO.md](https://github.com/codeaiforge/ai-ready-nx-workspace/blob/demo/java-spring-payment-reconciliation/DEMO.md) on that branch — no toolchain required to read it.
+
 ## Why This Exists
 
 AI coding agents are powerful, but without guardrails they tend to:
