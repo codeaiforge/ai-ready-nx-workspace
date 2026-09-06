@@ -6,18 +6,18 @@ Dedicated threat analysis for high-risk tasks — beyond the security dimension 
 
 ## Tiers
 
-Complex only, plus any task touching `auth` or `data-access` layers regardless of tier.
+Complex only, plus any task touching `auth` or `database` layers regardless of tier.
 
 ## Composition Blocks
 
-| Block | Source |
-| ----- | ------ |
-| ① Role Identity | `roles/security-engineer.md` |
-| ② Task Template | — (phase-specific instructions below) |
-| ③ Standards | `standards/security.md` |
-| ④ Iteration Context | Roadmap section + task row |
-| ⑤ Input Artifacts | Implemented code + Test Report from Phase ⑤ |
-| ⑥ Output Format | Security Assessment template below |
+| Block               | Source                                      |
+| ------------------- | ------------------------------------------- |
+| ① Role Identity     | `roles/security-engineer.md`                |
+| ② Task Template     | — (phase-specific instructions below)       |
+| ③ Standards         | `standards/security.md`                     |
+| ④ Iteration Context | Roadmap section + task row                  |
+| ⑤ Input Artifacts   | Implemented code + Test Report from Phase ⑤ |
+| ⑥ Output Format     | Security Assessment template below          |
 
 ## Phase Instructions
 
@@ -27,7 +27,7 @@ Complex only, plus any task touching `auth` or `data-access` layers regardless o
    - Session management follows framework best practices (no custom session handling)
    - OAuth redirect URIs properly scoped
    - Token handling follows provider best practices
-4. **Data-access-specific** (for `data-access` layer):
+4. **Database-specific** (for `database` layer):
    - Row-level security / access policies cover all CRUD operations for new table(s)
    - Cascade delete behavior verified (no orphaned data, no unauthorized access)
    - No raw SQL — all queries through ORM
@@ -43,15 +43,19 @@ Complex only, plus any task touching `auth` or `data-access` layers regardless o
 ### Security Assessment: {task_id}
 
 #### Threat Surface
+
 - {surface_1}: {risk_level} — {mitigation}
 
 #### OWASP Findings
+
 - {category}: {finding or "not applicable"}
 
 #### Access Policy Verification (if applicable)
+
 - {table/resource}: {operation} — {policy_name} — {verified}
 
 #### Dependency Audit
+
 - New dependencies: {count}
 - Known vulnerabilities: {count} ({severity})
 
@@ -62,5 +66,5 @@ Complex only, plus any task touching `auth` or `data-access` layers regardless o
 
 - No Critical or High findings
 - Medium findings documented with mitigation timeline
-- All access policies verified (if data-access layer)
+- All access policies verified (if database layer)
 - `{package-manager} audit` clean or findings acknowledged

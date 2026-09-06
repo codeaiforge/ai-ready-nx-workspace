@@ -10,26 +10,31 @@ All tiers. Input and test depth vary by tier.
 
 ## Composition Blocks
 
-| Block | Source |
-| ----- | ------ |
-| ① Role Identity | Specialist by layer (see routing below) |
-| ② Task Template | `tasks/implement-feature.md` |
-| ③ Standards | `standards/coding.md`, `standards/testing.md` |
-| ④ Iteration Context | Roadmap section + task row |
-| ⑤ Input Artifacts | Light: Task Brief. Standard/Complex: Design Spec |
-| ⑥ Output Format | Committed code + passing CI |
+| Block               | Source                                           |
+| ------------------- | ------------------------------------------------ |
+| ① Role Identity     | Specialist by layer (see routing below)          |
+| ② Task Template     | `tasks/implement-feature.md`                     |
+| ③ Standards         | `standards/coding.md`, `standards/testing.md`    |
+| ④ Iteration Context | Roadmap section + task row                       |
+| ⑤ Input Artifacts   | Light: Task Brief. Standard/Complex: Design Spec |
+| ⑥ Output Format     | Committed code + passing CI                      |
 
 ### Agent Routing by Layer
 
-| Task Layer | Primary Agent | Support Agent |
-| ---------- | ------------- | ------------- |
-| `shared` | Implementer | — |
-| `frontend` | Implementer | — |
-| `data-access` | Database Engineer | — |
-| `api` | Implementer | — |
-| `auth` | Implementer | Security Engineer (advisory) |
-| `infra`, `ci` | DevOps Engineer | — |
-| `testing` | QA Engineer | — |
+| Task Layer    | Primary Agent     | Support Agent                |
+| ------------- | ----------------- | ---------------------------- |
+| `monorepo`    | Implementer       | —                            |
+| `frontend`    | Implementer       | —                            |
+| `database`    | Database Engineer | —                            |
+| `api`         | Implementer       | —                            |
+| `auth`        | Implementer       | Security Engineer (advisory) |
+| `infra`, `ci` | DevOps Engineer   | —                            |
+| `ai`          | AI Engineer       | —                            |
+| `testing`     | QA Engineer       | —                            |
+| `docs`        | Implementer       | —                            |
+
+For a cross-layer task written `<a>+<b>`, the first layer named supplies the primary
+agent and the second contributes as support.
 
 Add additional layer mappings for your project's domain-specific concerns.
 

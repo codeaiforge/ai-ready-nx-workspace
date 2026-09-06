@@ -12,7 +12,7 @@ Full 8-phase pipeline for high-risk tasks (5-8 SP). All phases active including 
 
 Tasks matching these criteria are treated as Complex regardless of SP:
 
-- Touches multiple high-risk layers simultaneously (e.g., auth + data-access + external API)
+- Touches multiple high-risk layers simultaneously (e.g., auth + database + external API)
 - Flagged as a risk item with SP >= 3
 
 ## Pipeline
@@ -47,7 +47,7 @@ Tasks matching these criteria are treated as Complex regardless of SP:
 
 - **Agent**: Code Reviewer + 1-2 specialist reviewers
 - **Depth**: Deep review — all 5 dimensions + domain expertise
-- **Additional reviewers**: Security Engineer (if auth/data-access), Architect (if SP >= 5 or new boundary pattern)
+- **Additional reviewers**: Security Engineer (if auth/database), Architect (if SP >= 5 or new boundary pattern)
 - **Gate**: Zero Blockers; CI green after fixes
 
 ### ⑤ Test

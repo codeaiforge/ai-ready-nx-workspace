@@ -5,7 +5,7 @@
 ## Classification
 
 - **Story Points**: 3 SP
-- **Typical tasks**: Database migration, API endpoint, feature slice, CI pipeline, data-access library
+- **Typical tasks**: Database migration, API endpoint, feature slice, CI pipeline, database library
 - **Phase count**: 6
 
 ## Override Rules

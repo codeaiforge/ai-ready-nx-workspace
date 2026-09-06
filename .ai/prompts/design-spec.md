@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define *how* the task will be built — file paths, interfaces, data flow — before writing code.
+Define _how_ the task will be built — file paths, interfaces, data flow — before writing code.
 
 ## Tiers
 
@@ -10,26 +10,30 @@ Standard and Complex only. Light tier skips to Phase ③.
 
 ## Composition Blocks
 
-| Block | Source |
-| ----- | ------ |
-| ① Role Identity | `roles/architect.md` + specialist by layer |
-| ② Task Template | — (phase-specific instructions below) |
-| ③ Standards | `standards/architecture.md`, `standards/nx-boundaries.md` |
-| ④ Iteration Context | Roadmap section + task row |
-| ⑤ Input Artifacts | Task Brief from Phase ① |
-| ⑥ Output Format | Design Spec template below |
+| Block               | Source                                                    |
+| ------------------- | --------------------------------------------------------- |
+| ① Role Identity     | `roles/architect.md` + specialist by layer                |
+| ② Task Template     | — (phase-specific instructions below)                     |
+| ③ Standards         | `standards/architecture.md`, `standards/nx-boundaries.md` |
+| ④ Iteration Context | Roadmap section + task row                                |
+| ⑤ Input Artifacts   | Task Brief from Phase ①                                   |
+| ⑥ Output Format     | Design Spec template below                                |
 
 ### Co-Designer by Layer
 
-| Task Layer | Co-Designer | Role File |
-| ---------- | ----------- | --------- |
-| `data-access` | Database Engineer | `roles/database-engineer.md` |
-| `frontend` | Implementer | `roles/implementer.md` |
-| `auth`, `infra`, `ci` | DevOps Engineer | `roles/devops.md` |
-| `api` | Architect solo | — |
-| `testing` | QA Engineer | `roles/qa.md` |
+| Task Layer            | Co-Designer       | Role File                    |
+| --------------------- | ----------------- | ---------------------------- |
+| `database`            | Database Engineer | `roles/database-engineer.md` |
+| `frontend`            | Implementer       | `roles/implementer.md`       |
+| `auth`, `infra`, `ci` | DevOps Engineer   | `roles/devops.md`            |
+| `api`                 | Architect solo    | —                            |
+| `ai`                  | AI Engineer       | `roles/ai-engineer.md`       |
+| `testing`             | QA Engineer       | `roles/qa.md`                |
+| `monorepo`, `docs`    | Architect solo    | —                            |
 
-Add additional specialist mappings for your project's domain-specific layers.
+For a cross-layer task written `<a>+<b>` (e.g. `auth+api`), apply every matching row; the
+first layer named leads the design. Add specialist mappings for domain-specific layers, and
+add the layer to the canonical list in the roadmap template before using it in a task row.
 
 ## Phase Instructions
 
@@ -46,20 +50,25 @@ Add additional specialist mappings for your project's domain-specific layers.
 ## Design Spec: {task_id} — {task_name}
 
 ### Approach
+
 {1-3 paragraph description of how this will be built}
 
 ### Files to Create/Modify
-| File | Action | Purpose |
-| ---- | ------ | ------- |
+
+| File     | Action        | Purpose   |
+| -------- | ------------- | --------- |
 | `{path}` | Create/Modify | {purpose} |
 
 ### Interfaces / Contracts
+
 {TypeScript interfaces or schemas that define boundaries between components}
 
 ### Data Flow
+
 {Mermaid sequence diagram showing how data moves through the system}
 
 ### Nx Boundary Verification
+
 - Scope tags involved: {list}
 - Cross-boundary imports: {list with justification}
 - Violations: none
@@ -67,11 +76,13 @@ Add additional specialist mappings for your project's domain-specific layers.
 ### ADR Required: {yes — ADR-NNN | no}
 
 ### Risks
-| Risk | Likelihood | Mitigation |
-| ---- | ---------- | ---------- |
+
+| Risk   | Likelihood        | Mitigation   |
+| ------ | ----------------- | ------------ |
 | {risk} | {low/medium/high} | {mitigation} |
 
 ### Test Strategy
+
 - Unit: {what to test, where}
 - Integration: {what to test, where}
 - Fixtures needed: {yes/no — description}
