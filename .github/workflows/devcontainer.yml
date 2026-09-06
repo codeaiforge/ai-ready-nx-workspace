@@ -1,0 +1,49 @@
+name: Devcontainer
+
+# Proves "Open in Codespaces" still works. A broken devcontainer is invisible to the main CI
+# workflow — that runs on the runner, not in the container — and the failure would surface
+# to whoever tries the demo first.
+#
+# Deliberately not on every push: the build takes minutes and the gate it runs is already
+# covered, faster, by ci.yml. It runs when the container definition changes, and weekly to
+# catch drift it cannot see coming — base image updates, devcontainer feature releases, and
+# the pinned osv-scanner download URL going stale.
+on:
+  push:
+    paths:
+      - '.devcontainer/**'
+      - '.tool-versions'
+      - '.github/workflows/devcontainer.yml'
+  pull_request:
+    paths:
+      - '.devcontainer/**'
+      - '.tool-versions'
+  schedule:
+    # Mondays 06:00 UTC.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the devcontainer and run the gate inside it
+        uses: devcontainers/ci@v0.3
+        with:
+          # Never publish; this job exists to prove the definition builds.
+          push: never
+          # Running the gate inside the container is the point. It proves the toolchain the
+          # features installed actually works, and that Testcontainers can reach a Docker
+          # daemon through docker-in-docker — the piece most likely to differ from CI.
+          runCmd: |
+            set -eux
+            java -version
+            node --version
+            pnpm --version
+            osv-scanner --version
+            pnpm exec nx run-many -t check-format,test,build

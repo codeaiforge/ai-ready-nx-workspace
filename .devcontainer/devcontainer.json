@@ -15,14 +15,18 @@
     },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "20",
-      "pnpmVersion": "9"
+      // Must match the "packageManager" field in package.json. A container pnpm that
+      // differs from the host's makes pnpm treat a bind-mounted node_modules as foreign.
+      "pnpmVersion": "10.15.1"
     },
     // Testcontainers starts a real Postgres for the service's integration test,
     // so the container needs its own Docker daemon.
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
 
-  "postCreateCommand": "pnpm install --frozen-lockfile",
+  // osv-scanner backs the dependency-check target (Complex-tier security phase). No
+  // devcontainer feature publishes it, so pin the release binary directly.
+  "postCreateCommand": "sudo curl -sSL -o /usr/local/bin/osv-scanner https://github.com/google/osv-scanner/releases/download/v2.5.1/osv-scanner_linux_amd64 && sudo chmod +x /usr/local/bin/osv-scanner && pnpm install --frozen-lockfile --config.confirmModulesPurge=false",
 
   "customizations": {
     "vscode": {

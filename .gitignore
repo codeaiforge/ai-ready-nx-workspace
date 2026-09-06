@@ -7,6 +7,10 @@ out-tsc
 
 # dependencies
 node_modules
+# pnpm puts its content-addressable store here when the workspace is on a different
+# filesystem from the home directory — which is the case in the devcontainer, where the
+# workspace is bind-mounted. It is a regenerable cache, not source.
+.pnpm-store
 
 # IDEs and editors
 /.idea
