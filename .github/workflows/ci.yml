@@ -24,9 +24,9 @@ jobs:
 
       # This repo uses pnpm (pnpm-lock.yaml + pnpm-workspace.yaml). The stock Nx
       # template shipped npm; that fails here because there is no package-lock.json.
+      # No version here on purpose: action-setup reads the "packageManager" field in
+      # package.json, so CI, the devcontainer and the host cannot drift apart.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -51,6 +51,11 @@ jobs:
       # Nx Cloud (start-ci-run / record / fix-ci) removed: needs an unconfigured
       # token, and a red Actions tab during a demo undercuts the pitch.
       - run: pnpm exec nx format:check --base=origin/main
+
+      # Nx skips unknown targets silently, so a gate naming a target that does not exist
+      # passes while running nothing. Assert the stack profile's targets are all real
+      # before trusting the gate below.
+      - run: python3 scripts/check-gate-targets.py
 
       # The gate named in docs/specs/stack.md. run-many rather than affected: this
       # branch diverges permanently from main, so `affected --base=origin/main` would
