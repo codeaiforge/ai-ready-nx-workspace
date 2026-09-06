@@ -28,8 +28,14 @@ The Commit Checkpoint is also why re-running this yourself is not the intended e
 the pipeline stops for a human at every commit, so a fresh clone cannot reproduce the run
 without you standing in for those decisions. The **record** is the artifact.
 
-> **Status**: the trail is empty until Sprint 1 executes. Right now this branch contains the
-> seeded workspace, the specs, and the stack profile — the starting line, not the run.
+The baseline drift is measured against is
+[`docs/architecture/overview.md`](docs/architecture/overview.md) and ADRs 0001-0005 — the
+decisions the seeded workspace already embodies, recorded before the first task runs so
+they can be departed from visibly.
+
+> **Status**: the execution trail is empty until Sprint 1 runs. This branch currently holds
+> the seeded workspace, the specs, the architecture baseline and its ADRs — the starting
+> line, not the run.
 
 ## What is being built
 
@@ -40,7 +46,7 @@ and drift is obvious.
 packages/
 ├── reconciliation-core/      library     — domain model (Money, matching engine)
 └── reconciliation-service/   application — ingestion API, JPA/Flyway, audit, security
-                                            depends on core (Maven + Nx graph edge)
+                                            depends on core (Maven pom; Nx derives the edge)
 ```
 
 Requirements are in [`docs/specs/mvp-requirements.md`](docs/specs/mvp-requirements.md) as
