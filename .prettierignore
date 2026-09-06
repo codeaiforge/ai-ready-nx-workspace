@@ -3,3 +3,6 @@
 /coverage
 /.nx/cache
 /.nx/workspace-data
+
+# Lockfiles are tool-owned; reformatting them causes needless churn and conflicts.
+pnpm-lock.yaml
