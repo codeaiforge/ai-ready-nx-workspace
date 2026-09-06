@@ -18,12 +18,12 @@ This workspace solves those problems by establishing a **single source of truth*
 
 All agents and contributors must follow this strict precedence:
 
-| Priority | Source | Purpose |
-| -------- | ------ | ------- |
-| 1 | **Nx project graph** | Canonical system architecture and dependency boundaries |
-| 2 | **`/docs`** | Repository-internal documentation (architecture, requirements, ADRs, diagrams) |
-| 3 | **`/.ai`** | Shared AI governance: context, roles, standards, tasks, prompts, workflows |
-| 4 | **Agent folders** (`.claude/`, `.codex/`, `.gemini/`) | Implementation adapters only -- must not duplicate or override architecture |
+| Priority | Source                                                | Purpose                                                                        |
+| -------- | ----------------------------------------------------- | ------------------------------------------------------------------------------ |
+| 1        | **Nx project graph**                                  | Canonical system architecture and dependency boundaries                        |
+| 2        | **`/docs`**                                           | Repository-internal documentation (architecture, requirements, ADRs, diagrams) |
+| 3        | **`/.ai`**                                            | Shared AI governance: context, roles, standards, tasks, prompts, workflows     |
+| 4        | **Agent folders** (`.claude/`, `.codex/`, `.gemini/`) | Implementation adapters only -- must not duplicate or override architecture    |
 
 > Agents consume architecture. They do not redefine it.
 
@@ -33,7 +33,7 @@ All agents and contributors must follow this strict precedence:
 .
 ├── .ai/                    # Shared AI governance layer
 │   ├── context/            # Workspace context and Nx concept mappings
-│   ├── roles/              # Agent role definitions (architect, implementer, reviewer, QA, BA)
+│   ├── roles/              # Agent role definitions (architect, implementer, reviewer, QA, BA, specialists)
 │   ├── standards/          # Coding, architecture, testing, security, review standards
 │   ├── tasks/              # Executable task templates (implement-feature, create-library, ...)
 │   ├── prompts/            # Phase-specific SDLC prompt templates
@@ -89,13 +89,18 @@ The `/.ai` directory is the core of what makes this workspace "AI-ready". It def
 
 Predefined agent personas that map to SDLC responsibilities:
 
-| Role | File | Responsibility |
-| ---- | ---- | -------------- |
-| Architect | `roles/architect.md` | System design, boundary enforcement, ADRs |
-| Business Analyst | `roles/business-analyst.md` | Requirements analysis, acceptance criteria |
-| Implementer | `roles/implementer.md` | Code authoring following standards |
-| Reviewer | `roles/reviewer.md` | Code review, security, maintainability |
-| QA | `roles/qa.md` | Test strategy, validation, quality gates |
+| Role               | File                         | Responsibility                                      |
+| ------------------ | ---------------------------- | --------------------------------------------------- |
+| Architect          | `roles/architect.md`         | System design, boundary enforcement, ADRs           |
+| Business Analyst   | `roles/business-analyst.md`  | Requirements analysis, acceptance criteria          |
+| Implementer        | `roles/implementer.md`       | Code authoring following standards                  |
+| Database Engineer  | `roles/database-engineer.md` | Schema design, migrations, query performance        |
+| AI Engineer        | `roles/ai-engineer.md`       | LLM pipelines, versioned prompts, output validation |
+| Reviewer           | `roles/reviewer.md`          | Code review, security, maintainability              |
+| QA                 | `roles/qa.md`                | Test strategy, validation, quality gates            |
+| Security Engineer  | `roles/security-engineer.md` | Threat modelling, secure code review                |
+| DevOps Engineer    | `roles/devops.md`            | CI/CD, deployment, environment strategy             |
+| Compliance Checker | `roles/compliance.md`        | Regulatory obligations, data subject rights         |
 
 ### Standards
 
@@ -113,16 +118,16 @@ See [`.ai/tasks/`](.ai/tasks/) for the full set.
 
 Work flows through a tiered pipeline with quality gates between each phase:
 
-| Phase | Lead Agent | Purpose |
-| ----- | ---------- | ------- |
-| Analyze | Business Analyst | Understand requirements, resolve ambiguity |
-| Design | Architect | Define files, interfaces, data flow |
-| Implement | Specialist | Write code, tests, documentation |
-| Review | Reviewer | Verify correctness, security, maintainability |
-| Test | QA Engineer | Integration, accessibility, performance testing |
-| Security | Security Engineer | Threat analysis (complex tasks only) |
-| Deploy | DevOps Engineer | Ship to verifiable environment |
-| Verify | Business Analyst | Confirm acceptance criteria met |
+| Phase     | Lead Agent        | Purpose                                         |
+| --------- | ----------------- | ----------------------------------------------- |
+| Analyze   | Business Analyst  | Understand requirements, resolve ambiguity      |
+| Design    | Architect         | Define files, interfaces, data flow             |
+| Implement | Specialist        | Write code, tests, documentation                |
+| Review    | Reviewer          | Verify correctness, security, maintainability   |
+| Test      | QA Engineer       | Integration, accessibility, performance testing |
+| Security  | Security Engineer | Threat analysis (complex tasks only)            |
+| Deploy    | DevOps Engineer   | Ship to verifiable environment                  |
+| Verify    | Business Analyst  | Confirm acceptance criteria met                 |
 
 Three tiers control which phases are active:
 
@@ -136,12 +141,12 @@ See [`.ai/workflows/`](.ai/workflows/) for pipeline definitions and decision gat
 
 Each supported AI agent has an adapter file at the repo root that wires it into the shared governance layer:
 
-| File | Agent | Purpose |
-| ---- | ----- | ------- |
-| `CLAUDE.md` | Claude Code | Claude-specific Nx instructions |
-| `AGENTS.md` | Codex / Gemini / others | Shared agent governance + Nx guidelines |
-| `.cursor/` | Cursor | Cursor commands and subagents |
-| `.opencode/`, `opencode.json` | opencode | opencode commands, agents, and Nx MCP server |
+| File                          | Agent                   | Purpose                                      |
+| ----------------------------- | ----------------------- | -------------------------------------------- |
+| `CLAUDE.md`                   | Claude Code             | Claude-specific Nx instructions              |
+| `AGENTS.md`                   | Codex / Gemini / others | Shared agent governance + Nx guidelines      |
+| `.cursor/`                    | Cursor                  | Cursor commands and subagents                |
+| `.opencode/`, `opencode.json` | opencode                | opencode commands, agents, and Nx MCP server |
 
 These adapters reference `/.ai` for roles, standards, and tasks. They must not duplicate or override the shared definitions.
 
@@ -154,12 +159,12 @@ These adapters reference `/.ai` for roles, standards, and tasks. They must not d
 
 ### Nx Concepts in This Workspace
 
-| Nx Concept | Maps To |
-| ---------- | ------- |
-| apps | Deployable units (services, frontends, APIs) |
-| libs | Domain modules (business logic, shared utilities) |
-| tags | Architectural boundaries between domains |
-| project graph | Canonical system architecture |
+| Nx Concept    | Maps To                                           |
+| ------------- | ------------------------------------------------- |
+| apps          | Deployable units (services, frontends, APIs)      |
+| libs          | Domain modules (business logic, shared utilities) |
+| tags          | Architectural boundaries between domains          |
+| project graph | Canonical system architecture                     |
 
 ## Documentation
 
