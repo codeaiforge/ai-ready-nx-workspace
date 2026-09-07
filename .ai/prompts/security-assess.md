@@ -28,9 +28,12 @@ Complex only, plus any task touching `auth` or `database` layers regardless of t
    - OAuth redirect URIs properly scoped
    - Token handling follows provider best practices
 4. **Database-specific** (for `database` layer):
-   - Row-level security / access policies cover all CRUD operations for new table(s)
-   - Cascade delete behavior verified (no orphaned data, no unauthorized access)
-   - No raw SQL — all queries through ORM
+   - The stack's **Access control** mechanism covers every CRUD path to new table(s).
+     Whether that is enforced in the database or in the application is a property of the
+     stack — do not assume row-level security exists.
+   - Cascade / delete behaviour verified (no orphaned data, no unauthorized access)
+   - Application data access goes through the stack's **Data access** layer. Schema
+     migrations are DDL and are expected to be SQL; this rule is about queries.
 5. **API-specific** (for `api` layer):
    - Input validation on all endpoints
    - Rate limiting configured

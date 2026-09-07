@@ -16,18 +16,18 @@ Use TodoWrite to track phase progress throughout.
 
 Read `docs/specs/implementation-roadmap.md` and find the task row matching the target task ID. Extract:
 
-| Field | Source Column |
-| ----- | ------------ |
-| Task ID | # |
-| Name | Task |
-| Story Points | SP |
-| Priority | Priority (Must / Should / Could) |
-| Layer | Layer |
-| Dependencies | Depends on |
-| Requirements Trace | Trace |
-| Acceptance Criteria | Done when |
-| Sprint Number | Section header |
-| Wave Number | Execution waves table |
+| Field               | Source Column                    |
+| ------------------- | -------------------------------- |
+| Task ID             | #                                |
+| Name                | Task                             |
+| Story Points        | SP                               |
+| Priority            | Priority (Must / Should / Could) |
+| Layer               | Layer                            |
+| Dependencies        | Depends on                       |
+| Requirements Trace  | Trace                            |
+| Acceptance Criteria | Done when                        |
+| Sprint Number       | Section header                   |
+| Wave Number         | Execution waves table            |
 
 Also read `docs/specs/mvp-requirements.md` to resolve the Trace column to full requirement text.
 
@@ -47,11 +47,11 @@ If no prior task outputs exist, proceed without lessons.
 
 ## Step 2 — Classify Tier
 
-| SP | Tier | Pipeline |
-| -- | ---- | -------- |
-| 1–2 | Light | ① → ③ → ④ → ⑧ |
-| 3 | Standard | ① → ② → ③ → ④ → ⑤ → ⑧ |
-| 5–8 | Complex | ① → ② → ③ → ④ → ⑤ → ⑥ → ⑦ → ⑧ |
+| SP  | Tier     | Pipeline                      |
+| --- | -------- | ----------------------------- |
+| 1–2 | Light    | ① → ③ → ④ → ⑧                 |
+| 3   | Standard | ① → ② → ③ → ④ → ⑤ → ⑧         |
+| 5–8 | Complex  | ① → ② → ③ → ④ → ⑤ → ⑥ → ⑦ → ⑧ |
 
 **Override rules** — upgrade to next tier minimum when:
 
@@ -100,10 +100,10 @@ If any dependency is unmet: **STOP** — report exactly which task(s) must compl
 
 ### Agent model by tier
 
-| Tier | Execution model |
-| ---- | --------------- |
-| Light (1–2 SP) | **Single agent** — run all phases inline, reading each role file to shift perspective |
-| Standard (3 SP) | **Sub-agent per phase** — spawn a dedicated agent for each active phase via the Agent tool |
+| Tier             | Execution model                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------ |
+| Light (1–2 SP)   | **Single agent** — run all phases inline, reading each role file to shift perspective      |
+| Standard (3 SP)  | **Sub-agent per phase** — spawn a dedicated agent for each active phase via the Agent tool |
 | Complex (5–8 SP) | **Sub-agent per phase** — spawn a dedicated agent for each active phase via the Agent tool |
 
 **Single-agent phases** (Light tier): Read the role file, execute the phase, check the gate, then move on to the next phase within the same conversation context.
@@ -174,13 +174,13 @@ The orchestrator (this agent) passes artifacts between sub-agents and checks eac
 
 **Role**: Route by layer per the agent routing matrix in `.ai/workflows/task-pipeline.md`. Read the matching role file from `.ai/roles/`:
 
-| Layer | Primary Role File |
-| ----- | ----------------- |
-| `monorepo`, `frontend`, `api`, `auth` | `.ai/roles/implementer.md` |
-| `database` | `.ai/roles/database-engineer.md` |
-| `ai` | `.ai/roles/ai-engineer.md` |
-| `infra`, `ci` | `.ai/roles/devops.md` |
-| `testing` | `.ai/roles/qa.md` |
+| Layer                                 | Primary Role File                |
+| ------------------------------------- | -------------------------------- |
+| `monorepo`, `frontend`, `api`, `auth` | `.ai/roles/implementer.md`       |
+| `database`                            | `.ai/roles/database-engineer.md` |
+| `ai`                                  | `.ai/roles/ai-engineer.md`       |
+| `infra`, `ci`                         | `.ai/roles/devops.md`            |
+| `testing`                             | `.ai/roles/qa.md`                |
 
 For `auth` layer, also consult `.ai/roles/security-engineer.md` in an advisory capacity.
 
@@ -228,21 +228,21 @@ If the gate fails:
 
 **Additional reviewers by condition** (read their role files and apply their perspective):
 
-| Condition | Additional Role |
-| --------- | --------------- |
+| Condition                               | Additional Role                  |
+| --------------------------------------- | -------------------------------- |
 | Task touches `auth` or `database` layer | `.ai/roles/security-engineer.md` |
-| Task has `NFR-6.*` trace (GDPR) | `.ai/roles/compliance.md` |
-| Task introduces new Nx boundary pattern | `.ai/roles/architect.md` |
-| Task SP >= 5 (Complex tier) | `.ai/roles/architect.md` |
-| Task touches AI pipeline | `.ai/roles/ai-engineer.md` |
+| Task has `NFR-6.*` trace (GDPR)         | `.ai/roles/compliance.md`        |
+| Task introduces new Nx boundary pattern | `.ai/roles/architect.md`         |
+| Task SP >= 5 (Complex tier)             | `.ai/roles/architect.md`         |
+| Task touches AI pipeline                | `.ai/roles/ai-engineer.md`       |
 
 **Review depth by tier**:
 
-| Tier | Depth |
-| ---- | ----- |
-| Light | Quick pass — correctness + boundary compliance |
+| Tier     | Depth                                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------- |
+| Light    | Quick pass — correctness + boundary compliance                                                 |
 | Standard | Full review — 5 dimensions (correctness, security, maintainability, performance, architecture) |
-| Complex | Deep review — all dimensions + domain expertise from specialist reviewers |
+| Complex  | Deep review — all dimensions + domain expertise from specialist reviewers                      |
 
 1. Review all changes from Phase ③ against the Task Brief / Design Spec
 2. Evaluate across the 5 dimensions defined in `.ai/prompts/review-code.md`
@@ -313,7 +313,11 @@ Each blocker-fix round is a separate commit — present a fresh commit plan and 
    - Session management follows the stack's **Auth mechanism**
    - OAuth redirect URIs scoped correctly
    - Token handling follows the stack's **Auth mechanism** best practices
-6. **Dependency audit**: run the stack's **Dependency vulnerability audit** command — no known vulnerabilities in new dependencies
+6. **Dependency audit**: run the stack's **Dependency vulnerability audit** command. It scans
+   the full resolved dependency tree, not only what this task added — a Critical reached
+   transitively is exploitable regardless of who introduced it. Findings block per the gate
+   below; an unfixable upstream advisory is a decision for the human, not a reason to
+   narrow the scan
 
 **Output**: Security Assessment — use the format defined in `.ai/prompts/security-assess.md`
 
@@ -347,11 +351,11 @@ Follow the PR conventions in `.github/git-workflow.md`:
 
 **Verification depth by tier**:
 
-| Tier | Depth |
-| ---- | ----- |
-| Light | "Done when" spot check |
-| Standard | Full "Done when" verification + user flow smoke test |
-| Complex | Full verification + user flow test + regression check on dependent features |
+| Tier     | Depth                                                                       |
+| -------- | --------------------------------------------------------------------------- |
+| Light    | "Done when" spot check                                                      |
+| Standard | Full "Done when" verification + user flow smoke test                        |
+| Complex  | Full verification + user flow test + regression check on dependent features |
 
 1. Walk through every acceptance criterion from the Task Brief
 2. Verify each against the actual implementation (code review or deployed preview)
@@ -412,17 +416,17 @@ Create the file `.ai/sprints/sprint-{N}/tasks/{task-id}.md` with this format:
 
 ## Metrics
 
-| Metric | Value |
-| ------ | ----- |
-| Total phases | {count of phases executed} |
-| Gate failures | {count — list which phases failed and how many cycles} |
-| Review cycles | {N (max 3 before escalation)} |
-| Files changed | {count of files created + modified} |
-| Lines changed | {+N / -N from git diff --stat} |
-| Lint errors | {0 or count at final gate} |
-| Test count | {number of tests run, or N/A for Light} |
-| Build status | {pass / fail} |
-| Human interventions | {count} |
+| Metric              | Value                                                  |
+| ------------------- | ------------------------------------------------------ |
+| Total phases        | {count of phases executed}                             |
+| Gate failures       | {count — list which phases failed and how many cycles} |
+| Review cycles       | {N (max 3 before escalation)}                          |
+| Files changed       | {count of files created + modified}                    |
+| Lines changed       | {+N / -N from git diff --stat}                         |
+| Lint errors         | {0 or count at final gate}                             |
+| Test count          | {number of tests run, or N/A for Light}                |
+| Build status        | {pass / fail}                                          |
+| Human interventions | {count}                                                |
 
 ## Human Interventions
 
@@ -463,11 +467,11 @@ Output the summary to the conversation:
 
 ## Failure Escalation
 
-| Situation | Action |
-| --------- | ------ |
-| Unmet dependency | **STOP** — report which task(s) must complete first and what's missing |
-| Ambiguous requirement | **STOP** — present the ambiguity and ask user to clarify |
-| 3+ review/test cycles with recurring issues | **Escalate** — present the issue pattern and request architectural guidance |
-| Scope creep (task larger than SP estimate) | **Flag** — report the scope increase and let user decide to split or proceed |
-| External blocker (API down, tool broken) | **STOP** — document the blocker and suggest workaround |
-| CI flake (passes on retry) | Note it, proceed, but log for retrospective |
+| Situation                                   | Action                                                                       |
+| ------------------------------------------- | ---------------------------------------------------------------------------- |
+| Unmet dependency                            | **STOP** — report which task(s) must complete first and what's missing       |
+| Ambiguous requirement                       | **STOP** — present the ambiguity and ask user to clarify                     |
+| 3+ review/test cycles with recurring issues | **Escalate** — present the issue pattern and request architectural guidance  |
+| Scope creep (task larger than SP estimate)  | **Flag** — report the scope increase and let user decide to split or proceed |
+| External blocker (API down, tool broken)    | **STOP** — document the blocker and suggest workaround                       |
+| CI flake (passes on retry)                  | Note it, proceed, but log for retrospective                                  |
