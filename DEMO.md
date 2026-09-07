@@ -10,6 +10,27 @@ This branch is a worked example of the governance framework on `main`, not a pro
    record.
 3. The pipeline being genuinely stack-agnostic: `main` contains no Java, and everything
    Spring-specific here arrives through one file, [`docs/specs/stack.md`](docs/specs/stack.md).
+4. Quality gates that actually hold — including refusing to proceed past a real
+   vulnerability rather than reporting green.
+
+### The gates are not decorative
+
+The point is not that every roadmap task completes. It is that the pipeline stops when it
+should, and hands the decision to a person.
+
+Task 1.1 demonstrates this on the first task attempted. It touches the `database` layer, so
+the security phase runs, and its dependency audit scans the full resolved tree — a
+CycloneDX SBOM fed to `osv-scanner`. That surfaces three Critical advisories in
+`tomcat-embed-core`, reached transitively through `spring-boot-starter-webmvc`, with no
+fixed version published. The phase gate is "No Critical or High findings", so the task
+halts and the human decides: accept with an expiry, mitigate, or hold.
+
+Nothing here is staged. The advisories are real, they are not suppressed or baselined, and
+they were found by the same command the stack profile names. Two cheaper ways of running
+that audit were tried first and both reported clean — scanning the pom directly cannot
+resolve the local module and reports zero packages, and a direct-dependency scan sees 17
+packages and no findings. Only the full tree, at 100 packages, sees them. A gate is only
+worth having if it is capable of failing.
 
 ## You do not need to run anything
 
