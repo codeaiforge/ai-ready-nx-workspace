@@ -46,6 +46,9 @@ All agents and contributors must follow this strict precedence:
 │   ├── architecture/       # System architecture documentation
 │   ├── diagrams/           # Mermaid and visual diagrams
 │   └── requirements/       # Business and functional requirements
+├── tools/sdlc-controls/    # Nx graph -> component map adapter for the PR gate
+├── config/sdlc-controls/   # Criticality tag convention
+├── .githooks/              # commit-msg provenance check (opt in: core.hooksPath)
 ├── packages/               # Nx projects (apps and libs)
 ├── AGENTS.md               # Agent governance entry point (Codex/Gemini adapter)
 ├── CLAUDE.md               # Claude-specific adapter
@@ -131,13 +134,50 @@ Work flows through a tiered pipeline with quality gates between each phase:
 | Deploy    | DevOps Engineer   | Ship to verifiable environment                  |
 | Verify    | Business Analyst  | Confirm acceptance criteria met                 |
 
-Three tiers control which phases are active:
+Which phases are active is decided by the **risk tier the CI gate computes**, not by an
+estimate anyone on the change supplies:
 
-- **Light** (1--2 SP) -- 4 phases: Analyze, Implement, Review, Verify
-- **Standard** (3 SP) -- 6 phases: adds Design and Test
-- **Complex** (5--8 SP) -- all 8 phases: adds Security and Deploy
+| Emitted tier | Pipeline              | Phases                                          |
+| ------------ | --------------------- | ----------------------------------------------- |
+| `T0`         | Light                 | Analyze, Implement, Review, Verify              |
+| `T1`         | Standard              | adds Design and Test                            |
+| `T2`         | Standard + Security   | adds Security (the tier demands secrets + deps) |
+| `T3`         | Complex               | all 8 phases; 2 approvers, one independent      |
+
+Story points size effort. They never measured risk — see [the gate](#the-pr-gate) below.
 
 See [`.ai/workflows/`](.ai/workflows/) for pipeline definitions and decision gates.
+
+## The PR gate
+
+The pipeline above is enforced, not just described. Every pull request is tiered by
+[`git-native-sdlc-controls@v0.2.0`](https://github.com/codeaiforge/git-native-sdlc-controls)
+and emits a schema-valid `evidence/0` record, uploaded as a build artifact whether the
+change passes or is blocked.
+
+- **Tiering** (CAF-SDLC-002) from the change's blast radius.
+- **AI provenance** (CAF-SDLC-010): agent-authored commits carry `AI-Assisted` / `AI-Tool`
+  trailers, and the record attributes them.
+- **Independent approver** (CAF-SDLC-011): a `T3` change cannot merge on its author's own
+  approval.
+
+The component map the gate tiers against is **generated from the Nx project graph** on
+every run, never hand-maintained — path globs and fan-in are computed, so a
+widely-depended-on library escalates because the graph says so. Business criticality
+stays a declared input, as a reviewed `criticality:` project tag.
+
+| Read this                                                                  | For                                       |
+| -------------------------------------------------------------------------- | ----------------------------------------- |
+| [`docs/sdlc-controls-integration.md`](docs/sdlc-controls-integration.md)   | how the gate runs, tier mapping, known gaps |
+| [`docs/adr/0001-...`](docs/adr/0001-adopt-git-native-sdlc-controls.md)     | why, and what it does not claim           |
+| [`config/sdlc-controls/criticality-tags.md`](config/sdlc-controls/criticality-tags.md) | how to tag a project        |
+| [`tools/sdlc-controls/`](tools/sdlc-controls/)                             | the adapter, and running the gate locally |
+
+Enable the provenance hook once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
 
 ## Agent Adapters
 
