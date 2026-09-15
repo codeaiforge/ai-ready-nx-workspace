@@ -76,6 +76,22 @@ If you are committing work an agent produced — you reviewed an agent's patch a
 landing it — declare it. The trailer describes the change, not the person typing
 `git commit`.
 
+## Commits that predate this standard
+
+They carry no trailers, and the evidence record reads `ai_assisted: false`. That is
+accurate rather than a gap: the schema defines `false` as *nothing declared it*, which is
+exactly the case. It was never a claim that a human wrote them.
+
+**Do not rewrite history to add trailers to finished commits.** A declaration applied
+after the fact is one nobody made at the time, and manufacturing it is the dishonest case
+this control exists to make visible — not to make cheap. The same goes for a branch that
+predates the gate: it inherits this standard when it next takes `main`, and declares from
+that point on.
+
+If it matters that a body of earlier work was AI-assisted, say so once in the pull request
+or an ADR, where it reads as the retrospective claim it is, rather than as a per-commit
+declaration that was never made.
+
 ## The hook
 
 [`.githooks/commit-msg`](../../.githooks/commit-msg) checks two things. Enable it once
