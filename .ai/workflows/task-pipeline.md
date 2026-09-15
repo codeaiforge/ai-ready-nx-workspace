@@ -1,6 +1,30 @@
 # Workflow: Task Pipeline
 
-Defines the 8-phase SDLC pipeline that every task flows through. The tier classification determines which phases are active.
+Defines the 8-phase SDLC pipeline that every task flows through. The emitted risk tier determines which phases are active.
+
+## Tier authority
+
+The tier is **computed, not declared**. `sdlc-controls` tiers each pull request `T0`-`T3`
+from the change's blast radius and emits it in an `evidence/0` record; the pipeline reads
+that record. Nobody on the change selects its own tier.
+
+| Evidence tier | Pipeline                                        | Active phases   |
+| ------------- | ----------------------------------------------- | --------------- |
+| `T0`          | [Light](tier-light.md)                          | ① ③ ④ ⑧         |
+| `T1`          | [Standard](tier-standard.md)                    | ① ② ③ ④ ⑤ ⑧     |
+| `T2`          | [Standard](tier-standard.md) + Phase ⑥          | ① ② ③ ④ ⑤ ⑥ ⑧   |
+| `T3`          | [Complex](tier-complex.md)                      | ① - ⑧           |
+
+Story points size **effort**. They never measured **risk**, and using them as a risk
+proxy is what let a one-point change to an authentication module travel the Light path.
+Estimate in points; let the gate set the tier.
+
+Phase ⑥ Security remains an independent escalation: any task touching authentication,
+authorization, database or AI runs it whatever the gate emits. The gate reads paths, and
+a change can be dangerous for reasons no path reveals. Take the stricter of the two.
+
+How to read the tier, and what the gate does not claim:
+[docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md).
 
 ## Phases
 
@@ -21,7 +45,7 @@ Defines the 8-phase SDLC pipeline that every task flows through. The tier classi
 - A phase cannot start until its predecessor's quality gate passes
 - On review blocker: fix in Phase ③, re-enter Phase ④
 - On test failure: fix in Phase ③, re-enter Phase ⑤
-- Tier determines which phases are active (see tier files)
+- The emitted tier determines which phases are active (see the table above)
 
 ## Quality Gates
 

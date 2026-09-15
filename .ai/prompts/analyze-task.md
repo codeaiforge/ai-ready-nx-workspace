@@ -49,7 +49,11 @@ For Complex tier, also consult `roles/architect.md` for architectural constraint
 - Nx scope tags involved: {scope:*, type:*}
 - Dependencies satisfied: {yes | no — {blocking_task_ids}}
 
-### Tier Classification: {Light | Standard | Complex}
+### Effort Estimate: {1 | 2 | 3 | 5 | 8} SP
+### Expected Tier: {T0 | T1 | T2 | T3} — predicted, not decided. `sdlc-controls` tiers
+the pull request from its actual diff and that emitted tier selects the pipeline. Record
+the prediction so a large gap between it and the emitted tier is visible and worth asking
+about; never act on the prediction over the record.
 ### Complexity Notes: {for Complex — what makes this hard, what risks exist}
 ```
 
@@ -58,4 +62,4 @@ For Complex tier, also consult `roles/architect.md` for architectural constraint
 - Task Brief reviewed by human
 - Ambiguities resolved before proceeding
 - Dependencies confirmed satisfied
-- Tier classification validated against override rules
+- Effort estimated; expected tier recorded as a prediction, not a decision

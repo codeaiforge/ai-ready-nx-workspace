@@ -8,9 +8,9 @@ Orchestration definitions for the tiered SDLC pipeline. These files define how A
 | ---- | ------- |
 | [sprint-conductor.md](sprint-conductor.md) | Meta-agent orchestrating iteration lifecycle (planning, waves, gates, retro) |
 | [task-pipeline.md](task-pipeline.md) | Per-task SDLC pipeline: 8 phases, input/output contracts, quality gates |
-| [tier-light.md](tier-light.md) | 4-phase pipeline for trivial tasks (1-2 SP) |
-| [tier-standard.md](tier-standard.md) | 6-phase pipeline for moderate tasks (3 SP) |
-| [tier-complex.md](tier-complex.md) | 8-phase pipeline for high-risk tasks (5-8 SP) |
+| [tier-light.md](tier-light.md) | 4-phase pipeline, selected by evidence tier `T0` |
+| [tier-standard.md](tier-standard.md) | 6-phase pipeline, selected by evidence tier `T1`/`T2` |
+| [tier-complex.md](tier-complex.md) | 8-phase pipeline, selected by evidence tier `T3` |
 | [decision-gates.md](decision-gates.md) | Gate definitions and evaluation criteria at iteration boundaries |
 
 ## How These Relate to Other `.ai/` Directories

@@ -4,7 +4,7 @@ Meta-agent that orchestrates the entire iteration lifecycle. Does not write code
 
 ## Iteration Lifecycle
 
-1. **Planning** — Generate Task Briefs for all iteration tasks, confirm tier classifications, validate execution wave order, identify cross-task risks
+1. **Planning** — Generate Task Briefs for all iteration tasks, estimate effort and predict tiers, validate execution wave order, identify cross-task risks
 2. **Wave Execution** — For each wave: confirm dependencies met, launch parallel subagents per task, each runs tier-appropriate pipeline, wait for all to pass Verify, gate to next wave
 3. **Iteration Review** — Full regression, security sweep, accessibility audit, Definition of Done verification, performance spot check
 4. **Decision Gate** — If applicable: prepare gate evaluation, present to human for go/no-go
@@ -25,7 +25,7 @@ Meta-agent that orchestrates the entire iteration lifecycle. Does not write code
 
 ## Outputs
 
-- Iteration backlog with tier classifications
+- Iteration backlog with effort estimates and predicted tiers (the gate decides the real one)
 - Per-wave progress tracking
 - Iteration Review Report
 - Gate evaluation (if applicable)

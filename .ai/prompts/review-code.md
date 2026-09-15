@@ -34,7 +34,7 @@ All tiers. Review depth and reviewer count vary by tier.
 | Task touches `auth` or `database` layer     | Security Engineer               |
 | Task has compliance/regulatory requirements | Compliance Checker (if defined) |
 | Task introduces new Nx boundary pattern     | Architect                       |
-| Task SP >= 5 (Complex tier)                 | Architect                       |
+| Change tiered `T3` by the gate              | Architect                       |
 
 ## Phase Instructions
 

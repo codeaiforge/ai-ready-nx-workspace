@@ -1,19 +1,24 @@
 # Workflow: Complex Tier Pipeline
 
-Full 8-phase pipeline for high-risk tasks (5-8 SP). All phases active including dedicated Security review and per-task Deploy.
+Full 8-phase pipeline for changes the gate tiers `T3`. All phases active including dedicated Security review and per-task Deploy.
 
-## Classification
+## Selected by
 
-- **Story Points**: 5-8 SP
+**Evidence tier `T3`.** The tier is computed by `sdlc-controls` and read from the pull
+request's evidence record — it is not declared here, and not inferred from story points.
+See [docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md).
+
+- **Emitted tier**: `T3` — a `criticality:critical` component is affected, or a lower tier
+  escalated to the cap via fan-in, breadth or an undeclared path
+- **Required by the tier**: **2 approvers, one independent of the author** (CAF-SDLC-011),
+  owning-team reviewer, change-advisory deploy approval; lint, sast, secrets, deps
 - **Typical tasks**: OAuth/SSO setup, AI/ML pipeline, real-time/streaming architecture, compliance features, cross-cutting infrastructure changes
 - **Phase count**: 8
+- **Story points**: a planning estimate for effort. They do not select this pipeline.
 
-## Override Rules
-
-Tasks matching these criteria are treated as Complex regardless of SP:
-
-- Touches multiple high-risk layers simultaneously (e.g., auth + database + external API)
-- Flagged as a risk item with SP >= 3
+At `T3` the gate blocks a change approved only by its own author, AI-authored or not.
+That is segregation of duties between two forge accounts — not a claim that a second
+human read it. The forge's branch protection is what makes it stick.
 
 ## Pipeline
 
@@ -47,7 +52,7 @@ Tasks matching these criteria are treated as Complex regardless of SP:
 
 - **Agent**: Code Reviewer + 1-2 specialist reviewers
 - **Depth**: Deep review — all 5 dimensions + domain expertise
-- **Additional reviewers**: Security Engineer (if auth/database), Architect (if SP >= 5 or new boundary pattern)
+- **Additional reviewers**: Security Engineer (if auth/database), Architect (if a new boundary pattern, or the change affects a `shared` component)
 - **Gate**: Zero Blockers; CI green after fixes
 
 ### ⑤ Test

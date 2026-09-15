@@ -1,25 +1,33 @@
 # Workflow: Standard Tier Pipeline
 
-6-phase pipeline for moderate-risk tasks (3 SP). Adds Design and Test phases over Light tier.
+6-phase pipeline for changes the gate tiers `T1` or `T2`. Adds Design and Test phases over Light tier.
 
-## Classification
+## Selected by
 
-- **Story Points**: 3 SP
+**Evidence tier `T1` or `T2`.** The tier is computed by `sdlc-controls` and read from the
+pull request's evidence record — it is not declared here, and not inferred from story
+points. See [docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md).
+
+| Emitted tier | Pipeline                  | Required by the tier                          |
+| ------------ | ------------------------- | --------------------------------------------- |
+| `T1`         | the six phases below      | 1 approver; lint, sast                        |
+| `T2`         | the six phases **+ ⑥ Security** | owning-team reviewer; lint, sast, secrets, deps |
+
+`T2` adds Phase ⑥ because the tier itself demands secrets and dependency scanning — the
+work Phase ⑥ does. It is the same pipeline otherwise.
+
 - **Typical tasks**: Database migration, API endpoint, feature slice, CI pipeline, database library
-- **Phase count**: 6
+- **Phase count**: 6 (`T1`), 7 (`T2`)
+- **Story points**: a planning estimate for effort. They do not select this pipeline.
 
-## Override Rules
+## Escalation
 
-Tasks matching these criteria are upgraded to Complex:
+The gate escalates for blast radius — a `critical` component, a shared library, breadth,
+an undeclared path. If it emits `T3`, run [tier-complex.md](tier-complex.md).
 
-- SP >= 5
-- Flagged as a risk item in the roadmap and SP >= 3
-
-Tasks matching these criteria are upgraded to Standard (from Light):
-
-- Touches authentication or authorization logic
-- Has compliance/regulatory requirements
-- Part of a hardening/stabilization iteration
+One escalation stays independent of the tier: any task touching **authentication,
+authorization, database or AI** runs Phase ⑥ Security regardless of the emitted tier.
+Where the two disagree, take the stricter.
 
 ## Pipeline
 
