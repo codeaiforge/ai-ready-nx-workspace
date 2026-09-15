@@ -1,0 +1,73 @@
+#!/usr/bin/env sh
+# CAF-SDLC-010 provenance check.
+#
+# This hook does not write provenance. It cannot know who wrote a commit, and a
+# trailer a tool invented on your behalf is worth nothing in an audit — the whole
+# value of the control is that the declaration is a deliberate, attributable act.
+#
+# So it only refuses two states that are knowable and wrong:
+#
+#   1. an agent session produced this commit and declared nothing;
+#   2. something declared AI involvement but never said which tool — the exact
+#      violation `sdlc-controls tier` fails the pull request on, caught here
+#      instead of in CI.
+#
+# A human commit with no AI trailers is not touched.
+#
+# Install:  git config core.hooksPath .githooks
+# Standard: .ai/standards/ai-provenance.md
+set -eu
+
+msg_file="$1"
+# Strip git's comment lines; they are not part of the message.
+msg=$(grep -v '^#' "$msg_file" || true)
+
+case "$msg" in
+  # Merges, reverts and autosquash markers are not authored changes.
+  Merge\ *|Revert\ *|fixup!\ *|squash!\ *|amend!\ *) exit 0 ;;
+esac
+
+# Trailer keys are case-insensitive, as in internal/core/provenance.go.
+has_trailer() {
+  printf '%s\n' "$msg" | grep -qiE "^[[:space:]]*$1[[:space:]]*:[[:space:]]*[^[:space:]]"
+}
+
+has_tool=false;     has_trailer 'AI-Tool'     && has_tool=true
+has_assisted=false; has_trailer 'AI-Assisted' && has_assisted=true
+has_session=false;  has_trailer 'AI-Session'  && has_session=true
+
+declared=false
+{ $has_tool || $has_assisted || $has_session; } && declared=true
+
+# Any marker an agent runtime sets. Absence proves nothing — a human can commit
+# an agent's work — which is why this only ever adds a check, never a trailer.
+agent_session=false
+[ -n "${CLAUDECODE:-}" ] && agent_session=true
+[ -n "${AI_AGENT:-}" ] && agent_session=true
+[ -n "${CURSOR_AGENT:-}" ] && agent_session=true
+[ -n "${GEMINI_CLI:-}" ] && agent_session=true
+[ -n "${CODEX_SANDBOX:-}" ] && agent_session=true
+
+if $declared && ! $has_tool; then
+  echo "commit-msg: this commit declares AI involvement but names no tool." >&2
+  echo "            Add:  AI-Tool: <tool>" >&2
+  echo "            CAF-SDLC-010 — see .ai/standards/ai-provenance.md" >&2
+  exit 1
+fi
+
+if $agent_session && ! $declared; then
+  echo "commit-msg: this commit was made inside an agent session and declares no" >&2
+  echo "            provenance. The hook will not write it for you — declare it:" >&2
+  echo >&2
+  echo "              AI-Assisted: true" >&2
+  echo "              AI-Tool: ${AI_TOOL:-<your agent, e.g. claude-code>}" >&2
+  [ -n "${CLAUDE_CODE_SESSION_ID:-}" ] && echo "              AI-Session: ${CLAUDE_CODE_SESSION_ID}" >&2
+  echo "              Prompt-Ref: <issue or task>" >&2
+  echo >&2
+  echo "            A human committing by hand: unset AI_AGENT, or state the" >&2
+  echo "            provenance of the work you are committing." >&2
+  echo "            CAF-SDLC-010 — see .ai/standards/ai-provenance.md" >&2
+  exit 1
+fi
+
+exit 0
