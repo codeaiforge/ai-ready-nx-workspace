@@ -1,0 +1,206 @@
+# The SDLC controls gate.
+#
+# Tiers every pull request with github.com/codeaiforge/git-native-sdlc-controls and
+# fails the change that does not meet its tier's controls. Modelled on that repo's
+# own .github/workflows/controls.yml at v0.2.0 — same binary, same flags, same way
+# of reading the approver set.
+#
+# What is different here: the component map is not a committed file. It is generated
+# per run from the Nx project graph, so topology (paths, fan-in) is computed rather
+# than remembered. See docs/sdlc-controls-integration.md.
+#
+# Additive: .github/workflows/ci.yml still runs. This gate does not replace it.
+name: sdlc-controls
+
+on:
+  pull_request:
+  # Approvals land after a pull request is opened, so the gate re-runs when a review
+  # is submitted or dismissed. Without this the approver controls could only ever be
+  # evaluated against an empty set — the failure mode CAF-SDLC-011 exists to prevent.
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read # to read the pull request's reviews
+
+env:
+  # The one pin. Both the binary and the evidence schema are fetched at this exact
+  # tag, through the Go module proxy, so the two can never drift apart.
+  SDLC_CONTROLS_VERSION: v0.2.0
+
+jobs:
+  controls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Pin to the pull request head: on pull_request_review the default checkout
+          # is the base branch. refs/pull/N/head rather than the head sha, because it
+          # exists in this repository even when the pull request comes from a fork.
+          # Full history, because the tier is computed against the merge base.
+          ref: "refs/pull/${{ github.event.pull_request.number }}/head"
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install sdlc-controls
+        run: |
+          set -euo pipefail
+          go install "github.com/codeaiforge/git-native-sdlc-controls/cmd/sdlc-controls@${SDLC_CONTROLS_VERSION}"
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      # The adapter decides what the gate sees. A broken adapter would produce a map
+      # that tiers everything at T0 and passes, so its tests run before it is trusted.
+      - name: Test the component-map adapter
+        run: node --test "tools/sdlc-controls/*.test.mjs"
+
+      - name: Generate the component map from the Nx graph
+        env:
+          # Outside the repository on purpose. The map is a projection of the graph,
+          # not a source file, and writing it into the working tree would leave a
+          # generated artifact in the diff the gate is about to tier. The binary
+          # records the consequence — that its map-governance rule cannot apply to a
+          # map it cannot see in the diff — as a warning on every record, which is
+          # true. The generator itself is declared `critical` in the map to cover it.
+          MAP: ${{ runner.temp }}/components.yaml
+        run: |
+          set -euo pipefail
+          pnpm exec nx graph --file="${RUNNER_TEMP}/graph.json"
+          node tools/sdlc-controls/generate-component-map.mjs "${RUNNER_TEMP}/graph.json" > "${MAP}"
+          echo "::group::generated component map"
+          cat "${MAP}"
+          echo "::endgroup::"
+
+      # The map the tier decision is made under, printed alongside the decision.
+      # A map the binary rejects fails here, before anything has been tiered.
+      - name: Print the active policy binding
+        run: |
+          set -euo pipefail
+          sdlc-controls binding --config "${RUNNER_TEMP}/components.yaml" | tee "${RUNNER_TEMP}/binding.txt"
+
+      - name: Collect the approver set
+        id: approvers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          # GitHub counts the latest non-comment review per reviewer: a comment left
+          # after an approval does not revoke it, but a dismissal or a change request
+          # does. Count them the same way, or this gate would credit approvals the
+          # forge itself no longer honours.
+          approvers=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${PR}/reviews" \
+            --jq 'map(select(.state != "COMMENTED"))
+                  | group_by(.user.login) | map(last)
+                  | map(select(.state == "APPROVED") | .user.login)
+                  | unique | join(",")')
+          echo "list=${approvers}" >> "$GITHUB_OUTPUT"
+          echo "approvers: ${approvers:-(none)}"
+
+      - name: Tier this change
+        id: tier
+        # Event data reaches the shell through the environment, never through ${{ }}
+        # interpolation into the script body.
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          APPROVERS: ${{ steps.approvers.outputs.list }}
+        run: |
+          set -uo pipefail
+          # actions/checkout fetches the base branch as a remote-tracking ref, but say
+          # so explicitly: a missing base would exit 2 and fail the gate on plumbing
+          # rather than on the change.
+          git fetch --no-tags --quiet origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+
+          # --approvers-known: the set came from an actual query of the forge, so an
+          # empty result means nobody approved, not that nobody looked. Without it a
+          # verified zero would be indistinguishable from an unknown set and could
+          # never fail min_approvers.
+          sdlc-controls tier \
+            --base "origin/${BASE_REF}" \
+            --head "${HEAD_SHA}" \
+            --config "${RUNNER_TEMP}/components.yaml" \
+            --change-id "PR-${PR}" \
+            --author "${AUTHOR}" \
+            --approvers "${APPROVERS}" \
+            --approvers-known \
+            --evidence-out evidence.json \
+            | tee tier.txt
+          status=${PIPESTATUS[0]}
+
+          case "${status}" in
+            0) echo "controls met" ;;
+            1) echo "::error::sdlc-controls: this change does not meet its tier's controls" ;;
+            # Exit 2 is a usage or runtime error — an unreadable map, a bad ref. It is
+            # never a pass: a gate that cannot run has not cleared anything.
+            *) echo "::error::sdlc-controls exited ${status} (tool error): the gate did not run to a decision" ;;
+          esac
+          exit "${status}"
+
+      # The record has to be a valid evidence/0 document, not merely JSON the binary
+      # happened to print. The schema is read from the same pinned module as the
+      # binary, so the two cannot drift. Runs on failure too: a blocked change emits
+      # a record, and that record is the point.
+      - name: Validate the evidence record against evidence/0
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f evidence.json ] || { echo "no evidence record (the run exited before a decision)"; exit 0; }
+          go mod download "github.com/codeaiforge/git-native-sdlc-controls@${SDLC_CONTROLS_VERSION}"
+          schema="$(go env GOMODCACHE)/github.com/codeaiforge/git-native-sdlc-controls@${SDLC_CONTROLS_VERSION}/schemas/evidence/0/evidence.schema.json"
+          # --strict=false: ajv's strict mode rejects the schema's own x-status and
+          # x-stability annotations. The date-time format is left unasserted; it is
+          # produced by the binary's time marshalling, not by user input.
+          pnpm dlx ajv-cli@5.0.0 validate --spec=draft2020 --strict=false \
+            -s "${schema}" -d evidence.json
+          # The pin held all the way to the record: the binary names its own version.
+          jq -e --arg v "${SDLC_CONTROLS_VERSION#v}" '.tool.version == $v' evidence.json > /dev/null \
+            || { echo "::error::evidence names tool version $(jq -r .tool.version evidence.json), expected ${SDLC_CONTROLS_VERSION#v}"; exit 1; }
+
+      - name: Post the decision
+        if: always()
+        run: |
+          # The job summary, not a pull request comment: a pull_request run from a
+          # fork gets a read-only token, and a gate that cannot report on fork
+          # contributions is not a gate.
+          {
+            echo '## SDLC controls'
+            echo
+            echo '```'
+            cat tier.txt 2>/dev/null || echo 'the controls run did not produce a decision'
+            echo '```'
+            echo
+            echo '<details><summary>Active policy binding</summary>'
+            echo
+            echo '```'
+            cat "${RUNNER_TEMP}/binding.txt" 2>/dev/null || echo '(not printed)'
+            echo '```'
+            echo
+            echo '</details>'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the evidence record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdlc-controls-evidence
+          path: |
+            evidence.json
+            tier.txt
+          if-no-files-found: warn

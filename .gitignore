@@ -42,3 +42,14 @@ Thumbs.db
 .nx/workspace-data
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+
+# sdlc-controls gate: all generated per run, never committed.
+# The component map is a projection of the Nx graph — see
+# docs/sdlc-controls-integration.md. CI writes these to $RUNNER_TEMP.
+graph.json
+evidence.json
+tier.txt
+config/sdlc-controls/components.generated.yaml
+
+# JVM crash dumps
+hs_err_pid*.log
