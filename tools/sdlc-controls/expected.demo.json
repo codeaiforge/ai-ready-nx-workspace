@@ -1,0 +1,10 @@
+{
+  "_comment": "Facts about this branch's workspace, asserted by tools/sdlc-controls/verify.sh. They live here rather than in the script so the script stays framework-level and any workspace can run it. Run: SDLC_EXPECT=tools/sdlc-controls/expected.demo.json tools/sdlc-controls/verify.sh",
+
+  "edges": [["reconciliation-service", "reconciliation-core"]],
+
+  "criticality": {
+    "reconciliation-core": "critical",
+    "reconciliation-service": "high"
+  }
+}
