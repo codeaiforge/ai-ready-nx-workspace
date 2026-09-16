@@ -2,7 +2,7 @@
   "name": "reconciliation-core",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/reconciliation-core/src",
-  "tags": [],
+  "tags": ["criticality:critical"],
   "targets": {
     "check-format": {
       "executor": "nx:run-commands",

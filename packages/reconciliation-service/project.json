@@ -2,7 +2,7 @@
   "name": "reconciliation-service",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/reconciliation-service/src",
-  "tags": [],
+  "tags": ["criticality:high"],
   "targets": {
     "check-format": {
       "executor": "nx:run-commands",
