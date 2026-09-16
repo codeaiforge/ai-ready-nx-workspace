@@ -45,7 +45,10 @@ Thumbs.db
 
 # sdlc-controls gate: all generated per run, never committed.
 # The component map is a projection of the Nx graph — see
-# docs/sdlc-controls-integration.md. CI writes these to $RUNNER_TEMP.
+# docs/sdlc-controls-integration.md. CI writes these to $RUNNER_TEMP;
+# tools/sdlc-controls/verify.sh writes them here, inside the repo, so a
+# local run leaves the same record on disk that CI uploads.
+/.sdlc-controls/
 graph.json
 evidence.json
 tier.txt
