@@ -37,4 +37,26 @@ public record Money(long minorUnits, Currency currency) {
     }
     return new Money(Math.addExact(minorUnits, other.minorUnits), currency);
   }
+
+  /**
+   * Splits this amount into {@code ways} parts that sum back to the original.
+   *
+   * <p>The remainder is spread one minor unit at a time over the leading parts rather than
+   * discarded, so no money is created or destroyed by the split.
+   *
+   * @throws IllegalArgumentException if {@code ways} is not positive
+   */
+  public Money[] allocate(int ways) {
+    if (ways <= 0) {
+      throw new IllegalArgumentException("ways must be positive, got %d".formatted(ways));
+    }
+    long base = minorUnits / ways;
+    long remainder = minorUnits % ways;
+    Money[] parts = new Money[ways];
+    for (int i = 0; i < ways; i++) {
+      long extra = i < Math.abs(remainder) ? Long.signum(remainder) : 0;
+      parts[i] = new Money(base + extra, currency);
+    }
+    return parts;
+  }
 }
