@@ -1,4 +1,4 @@
-# ADR-0003: Test against a real Postgres via Testcontainers, not an in-memory substitute
+# ADR-0103: Test against a real Postgres via Testcontainers, not an in-memory substitute
 
 - **Status**: Accepted
 - **Date**: 2026-09-06

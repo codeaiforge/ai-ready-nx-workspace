@@ -1,4 +1,4 @@
-# ADR-0005: Expose the health endpoint unauthenticated, and nothing else
+# ADR-0105: Expose the health endpoint unauthenticated, and nothing else
 
 - **Status**: Accepted
 - **Date**: 2026-09-06

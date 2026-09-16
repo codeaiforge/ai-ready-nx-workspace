@@ -1,4 +1,4 @@
-# ADR-0002: Represent money as integer minor units with an explicit currency
+# ADR-0102: Represent money as integer minor units with an explicit currency
 
 - **Status**: Accepted
 - **Date**: 2026-09-06

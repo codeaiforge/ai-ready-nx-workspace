@@ -29,7 +29,7 @@ reconciliation-service ──depends on──▶ reconciliation-core
 ```
 
 The dependency runs one way and the build enforces it: core cannot reference the service.
-See [ADR-0004](../adr/0004-split-domain-core-from-service.md).
+See [ADR-0104](../adr/0104-split-domain-core-from-service.md).
 
 ## Layers within the service
 
@@ -42,11 +42,11 @@ across features.
 
 | Decision                                                                             | ADR                                                                 |
 | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| Nx is the impact engine; Maven executes. The pom is the only dependency declaration. | [ADR-0001](../adr/0001-nx-as-build-and-impact-engine-over-maven.md) |
-| Money is integer minor units plus ISO-4217 currency. No floating point.              | [ADR-0002](../adr/0002-money-as-integer-minor-units.md)             |
-| Integration tests run against real Postgres via Testcontainers.                      | [ADR-0003](../adr/0003-testcontainers-as-integration-harness.md)    |
-| The domain lives in a library separate from the service.                             | [ADR-0004](../adr/0004-split-domain-core-from-service.md)           |
-| Health is unauthenticated; nothing else is exposed.                                  | [ADR-0005](../adr/0005-unauthenticated-health-endpoint.md)          |
+| Nx is the impact engine; Maven executes. The pom is the only dependency declaration. | [ADR-0101](../adr/0101-nx-as-build-and-impact-engine-over-maven.md) |
+| Money is integer minor units plus ISO-4217 currency. No floating point.              | [ADR-0102](../adr/0102-money-as-integer-minor-units.md)             |
+| Integration tests run against real Postgres via Testcontainers.                      | [ADR-0103](../adr/0103-testcontainers-as-integration-harness.md)    |
+| The domain lives in a library separate from the service.                             | [ADR-0104](../adr/0104-split-domain-core-from-service.md)           |
+| Health is unauthenticated; nothing else is exposed.                                  | [ADR-0105](../adr/0105-unauthenticated-health-endpoint.md)          |
 
 ## Constraints these place on new work
 
@@ -75,7 +75,7 @@ Recorded so their absence is visible rather than mistaken for an oversight:
   means choosing a registry, credentials handling, and a promotion path.
 - **Ingestion idempotency mechanism.** Required by NFR-3.1 and scheduled as task 2.6; the
   approach (natural key, content hash, or delivery receipt) is open.
-- **The real access-control policy.** `SecurityConfig` implements only ADR-0005 — health
+- **The real access-control policy.** `SecurityConfig` implements only ADR-0105 — health
   permitted, everything else authenticated — so the deploy gate can reach the probe. Task
   2.4 (NFR-2.1) owns the actual policy and is expected to replace that class, carrying the
-  ADR-0005 rule forward.
+  ADR-0105 rule forward.

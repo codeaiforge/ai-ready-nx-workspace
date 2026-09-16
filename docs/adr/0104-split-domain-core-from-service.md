@@ -1,4 +1,4 @@
-# ADR-0004: Keep the reconciliation domain in a library separate from the service
+# ADR-0104: Keep the reconciliation domain in a library separate from the service
 
 - **Status**: Accepted
 - **Date**: 2026-09-06
@@ -27,7 +27,7 @@ with no Spring Boot plugin and no infrastructure dependencies, and have
 - **Option A — separate core library (chosen)**: domain logic is unit-testable in
   milliseconds with no container; the dependency direction is enforced by the build rather
   than by convention. Costs a second project, a published jar between them, and a dependency
-  edge that must stay consistent in both Maven and the Nx graph (see ADR-0001).
+  edge that must stay consistent in both Maven and the Nx graph (see ADR-0101).
 - **Option B — single service, package-level separation**: fewer moving parts, and the same
   separation is expressible with packages. But nothing enforces it — an `import` from domain
   into persistence compiles fine, and the boundary erodes exactly when schedule pressure
