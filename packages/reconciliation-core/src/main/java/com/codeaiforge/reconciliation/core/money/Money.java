@@ -37,4 +37,19 @@ public record Money(long minorUnits, Currency currency) {
     }
     return new Money(Math.addExact(minorUnits, other.minorUnits), currency);
   }
+
+  /**
+   * The signed difference between two amounts, for reporting a settlement break.
+   *
+   * @throws IllegalArgumentException if the currencies differ
+   * @throws ArithmeticException if the result overflows
+   */
+  public Money minus(Money other) {
+    if (!currency.equals(other.currency)) {
+      throw new IllegalArgumentException(
+          "cannot subtract %s from %s"
+              .formatted(other.currency.getCurrencyCode(), currency.getCurrencyCode()));
+    }
+    return new Money(Math.subtractExact(minorUnits, other.minorUnits), currency);
+  }
 }
