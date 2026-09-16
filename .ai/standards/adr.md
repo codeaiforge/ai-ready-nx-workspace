@@ -42,10 +42,48 @@ new constraints the decision imposes on future work.
 
 ## Numbering and status
 
-- Numbers are labels, not order-of-execution. Allocate the next free `NNNN`.
+- Numbers are labels, not order-of-execution. Allocate the next free `NNNN`
+  **within your branch's block** (see below).
 - New ADR starts `Proposed`; becomes `Accepted` only after review.
 - To reverse a decision, add a new ADR and set the old one's status to
   `Superseded by ADR-MMMM`. The superseded ADR stays in the tree.
+
+## Number blocks
+
+A stack branch inherits `main`'s ADRs when it merges, so both sets live in one
+`docs/adr/`. One sequence for two scopes produces two `ADR-0001`s, and a prose
+reference to "ADR-0001" then names nothing in particular. The number space is
+partitioned instead:
+
+| Block         | Scope                                                              | Branch                        |
+| ------------- | ------------------------------------------------------------------ | ----------------------------- |
+| `0001`-`0099` | Framework decisions: the governance layer, CI gates, workspace tooling | `main`                        |
+| `0101`-`0199` | Stack decisions for the first stack branch                         | `demo/java-spring-payment-reconciliation` |
+| `0201`-`0299` | Stack decisions for the next stack branch                          | a future demo                 |
+
+These are all ADRs — same template, same lifecycle, same standard. Only the scope
+of the decision differs, so the identifier stays `ADR-NNNN` and the block carries
+the scope. A new stack branch claims the next free hundred and records it here.
+
+`0100`, `0200` and so on are left unused, so a block boundary is visible at a
+glance rather than inferred.
+
+Enforced by `node tools/adr/check-numbering.mjs`: a duplicate number, a filename
+that disagrees with its title, or a number outside every declared block fails the
+build. A numbering rule nothing checks is a convention, not a control — which is
+how two `ADR-0001`s reached `main` and a stack branch in the first place.
+
+### Renumbering
+
+Still forbidden, with one exception already spent. The rule exists to protect
+references that have left the repository — links in pull requests, issues, forks.
+When no such reference can exist, preserving an ambiguous number serves the
+letter of the rule and not its purpose.
+
+The stack ADRs were renumbered once into `0101`-`0105` when the blocks were
+introduced, at a point where the repository had no forks and no outside
+contributors. That exception is recorded here so it reads as a decision rather
+than as precedent: after this, supersede.
 
 ## Approval
 

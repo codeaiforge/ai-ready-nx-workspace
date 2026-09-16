@@ -34,6 +34,10 @@ jobs:
 
       # Nx Cloud (start-ci-run / record / fix-ci) removed: needs an unconfigured
       # token, and a red Actions tab during a demo undercuts the pitch.
+      # .ai/standards/adr.md partitions ADR numbers into per-branch blocks. Two
+      # ADR-0001s reached the repo while that rule was prose, so it is checked.
+      - run: node tools/adr/check-numbering.mjs
+
       - run: pnpm exec nx format:check --base=origin/main
       - run: pnpm exec nx affected -t lint test build typecheck --base=origin/main
       # NB: affected across an empty workspace is a no-op and exits 0. Once
