@@ -66,7 +66,11 @@ jobs:
       # The adapter decides what the gate sees. A broken adapter would produce a map
       # that tiers everything at T0 and passes, so its tests run before it is trusted.
       - name: Test the component-map adapter
-        run: node --test "tools/sdlc-controls/*.test.mjs"
+        # Unquoted on purpose: the shell expands the glob. Node only accepts a
+        # glob pattern itself from 22 onward, and this job pins Node 20 to match
+        # .tool-versions, so a quoted pattern reaches node as a literal path and
+        # the step fails with "Could not find".
+        run: node --test tools/sdlc-controls/*.test.mjs
 
       - name: Generate the component map from the Nx graph
         env:
