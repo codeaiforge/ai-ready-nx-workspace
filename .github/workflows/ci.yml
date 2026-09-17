@@ -22,8 +22,10 @@ jobs:
       # This repo uses pnpm (pnpm-lock.yaml + pnpm-workspace.yaml). The stock Nx
       # template shipped npm; that fails here because there is no package-lock.json.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # No version here: action-setup@v4 reads "packageManager" from
+        # package.json, so CI, the devcontainer and a developer machine
+        # cannot drift onto different pnpm releases. Declaring both made
+        # the action refuse to choose and fail before any step ran.
 
       - uses: actions/setup-node@v4
         with:
