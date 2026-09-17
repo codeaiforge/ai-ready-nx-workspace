@@ -58,7 +58,14 @@ jobs:
       # ADR-0001s reached the repo while that rule was prose, so it is checked.
       - run: node tools/adr/check-numbering.mjs
 
-      - run: pnpm exec nx format:check --base=origin/main
+      # Against the pull request's own base, not main. This branch diverges
+      # permanently from main, so --base=origin/main re-checks all of that
+      # divergence on every run and fails a pull request for pre-existing
+      # formatting it never touched. base.sha is already in history under
+      # fetch-depth: 0; the fallback covers the push trigger above.
+      - run: pnpm exec nx format:check --base="${BASE}"
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
 
       # Nx skips unknown targets silently, so a gate naming a target that does not exist
       # passes while running nothing. Assert the stack profile's targets are all real
