@@ -4,17 +4,17 @@ Generates the component map that
 [`git-native-sdlc-controls@v0.2.0`](https://github.com/codeaiforge/git-native-sdlc-controls)
 tiers this repository's pull requests against.
 
-| File                           | What it is                                                     |
-| ------------------------------ | -------------------------------------------------------------- |
-| `generate-component-map.mjs`   | Nx project graph → `components.yaml`. Pure, deterministic.      |
-| `generate-component-map.test.mjs` | Unit tests over fixture graphs (`node --test`).              |
-| `acceptance.sh`                | End-to-end gate behaviour against the real binary.              |
+| File                              | What it is                                                 |
+| --------------------------------- | ---------------------------------------------------------- |
+| `generate-component-map.mjs`      | Nx project graph → `components.yaml`. Pure, deterministic. |
+| `generate-component-map.test.mjs` | Unit tests over fixture graphs (`node --test`).            |
+| `acceptance.sh`                   | End-to-end gate behaviour against the real binary.         |
 
 ## Why this exists
 
 The binary tiers a change by matching its diff against a declared component map. Its
-documented ceiling is that the map is hand-maintained: *"a high fan-in component that
-nobody declared `shared: true` will be under-tiered"* (CAF-SDLC-002). That ceiling is
+documented ceiling is that the map is hand-maintained: _"a high fan-in component that
+nobody declared `shared: true` will be under-tiered"_ (CAF-SDLC-002). That ceiling is
 real for a generic repository. It is not real here — this workspace has a computed
 project graph, so topology does not have to be remembered.
 

@@ -21,12 +21,12 @@ AI-Session: 4f2c1a80-7d3e-4b19-9c55-0ae61b2d8f34
 Prompt-Ref: #12
 ```
 
-| Trailer       | Required        | Value                                                      |
-| ------------- | --------------- | ---------------------------------------------------------- |
-| `AI-Assisted` | yes, if AI used | `true`                                                      |
+| Trailer       | Required            | Value                                                      |
+| ------------- | ------------------- | ---------------------------------------------------------- |
+| `AI-Assisted` | yes, if AI used     | `true`                                                     |
 | `AI-Tool`     | **yes**, if AI used | `claude-code`, `codex`, `gemini-cli`, `cursor`, `opencode` |
-| `AI-Session`  | optional        | the tool's own session id, verbatim                         |
-| `Prompt-Ref`  | optional        | the issue or task the work came from, e.g. `#12`            |
+| `AI-Session`  | optional            | the tool's own session id, verbatim                        |
+| `Prompt-Ref`  | optional            | the issue or task the work came from, e.g. `#12`           |
 
 Keys are case-insensitive. A change counts as AI-assisted if **any** commit in it says
 so, so squashing does not lose the declaration.
@@ -79,7 +79,7 @@ landing it — declare it. The trailer describes the change, not the person typi
 ## Commits that predate this standard
 
 They carry no trailers, and the evidence record reads `ai_assisted: false`. That is
-accurate rather than a gap: the schema defines `false` as *nothing declared it*, which is
+accurate rather than a gap: the schema defines `false` as _nothing declared it_, which is
 exactly the case. It was never a claim that a human wrote them.
 
 **Do not rewrite history to add trailers to finished commits.** A declaration applied

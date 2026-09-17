@@ -3,3 +3,9 @@
 /coverage
 /.nx/cache
 /.nx/workspace-data
+
+# Generated per run, never authored: the gate's local output and the memory index.
+# `nx format:check --all` walks the filesystem, so a git-ignored directory is still
+# format-checked unless it is named here.
+/.sdlc-controls
+/.memsearch

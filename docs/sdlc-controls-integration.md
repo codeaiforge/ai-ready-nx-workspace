@@ -33,11 +33,11 @@ not replace them. It is a separate required check.
 
 ### Fail closed
 
-| `tier` exit | Meaning                        | Job    |
-| ----------- | ------------------------------ | ------ |
-| 0           | controls met                   | passes |
-| 1           | controls not met               | fails  |
-| 2           | tool or usage error            | fails  |
+| `tier` exit | Meaning             | Job    |
+| ----------- | ------------------- | ------ |
+| 0           | controls met        | passes |
+| 1           | controls not met    | fails  |
+| 2           | tool or usage error | fails  |
 
 Exit 2 is never a pass. A gate that could not run has not cleared anything.
 
@@ -70,19 +70,19 @@ not claim it is.
 The binary is the **single authority on risk tier**. The pipeline in `.ai/workflows/`
 reads it; it no longer declares one.
 
-| Evidence `tier` | Pipeline          | Phases                    | Because the tier requires                  |
-| --------------- | ----------------- | ------------------------- | ------------------------------------------- |
-| `T0`            | Light             | ① ③ ④ ⑧                   | 1 approver, lint                            |
-| `T1`            | Standard          | ① ② ③ ④ ⑤ ⑧               | 1 approver, lint + sast                     |
-| `T2`            | Standard + ⑥      | ① ② ③ ④ ⑤ ⑥ ⑧             | owning-team reviewer; secrets + deps scans  |
-| `T3`            | Complex           | ① – ⑧, human design gate  | 2 approvers, **independent** approver       |
+| Evidence `tier` | Pipeline     | Phases                   | Because the tier requires                  |
+| --------------- | ------------ | ------------------------ | ------------------------------------------ |
+| `T0`            | Light        | ① ③ ④ ⑧                  | 1 approver, lint                           |
+| `T1`            | Standard     | ① ② ③ ④ ⑤ ⑧              | 1 approver, lint + sast                    |
+| `T2`            | Standard + ⑥ | ① ② ③ ④ ⑤ ⑥ ⑧            | owning-team reviewer; secrets + deps scans |
+| `T3`            | Complex      | ① – ⑧, human design gate | 2 approvers, **independent** approver      |
 
 Two things this mapping deliberately does not do:
 
 - **It adds no fifth tier and renames nothing.** Light/Standard/Complex are ceremony
   levels; `T0`–`T3` is blast radius. The table maps one onto the other.
 - **It does not replace story points.** Story points are a planning estimate for
-  *effort*. They were never a measurement of *risk*, and using them as one is what let a
+  _effort_. They were never a measurement of _risk_, and using them as one is what let a
   1-point change to an authentication module travel the Light path. Effort still sizes
   the work; the gate sets the tier.
 
@@ -110,7 +110,7 @@ them. Convention and enforcement: [`.ai/standards/ai-provenance.md`](../../.ai/s
 
 At **T3** the independent-approver control (CAF-SDLC-011) means an AI-authored change
 cannot merge on its author's own approval. Note the precise scope, because it is easy to
-oversell: the rule is attached to the *tier*, not to AI provenance. Every T3 change needs
+oversell: the rule is attached to the _tier_, not to AI provenance. Every T3 change needs
 an independent approver, AI-assisted or not, and an AI-assisted change at T0–T2 needs
 none from this engine. And "independent" means a second forge account, not a second
 human — tying accounts to people is the forge's job.
@@ -163,7 +163,7 @@ around by patching the engine.
    it actually knows.
 2. **A generated map cannot be governed.** The map-governance rule assumes the map is a
    committed file. For a caller that projects the map from a build graph, governance
-   should attach to the *generator*, which the schema cannot express — there is no way
+   should attach to the _generator_, which the schema cannot express — there is no way
    for a map to say "the thing that produced me lives at this path". Today the caller
    has to smuggle that in as an ordinary `critical` component, which works but reads as
    an unrelated declaration.

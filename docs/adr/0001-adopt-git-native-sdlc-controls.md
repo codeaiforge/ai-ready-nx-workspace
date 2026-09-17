@@ -24,9 +24,9 @@ record per change. Reimplementing any of that here would produce a second, worse
 that drifts.
 
 The binary has one documented ceiling. It tiers from a **hand-maintained** component map,
-and its own control document is candid about the consequence: *"a high fan-in component
-that nobody declared `shared: true` will be under-tiered"*, and *"`shared` is a boolean
-stand-in for what is really a fan-in count"*. It accepts that trade because computing
+and its own control document is candid about the consequence: _"a high fan-in component
+that nobody declared `shared: true` will be under-tiered"_, and _"`shared` is a boolean
+stand-in for what is really a fan-in count"_. It accepts that trade because computing
 fan-in would require per-language build-tool integration, which would cost the binary the
 tooling-agnostic property that makes it portable at all.
 
@@ -76,7 +76,7 @@ Specifically:
   and the two would diverge on the first bug fixed in one of them. A worse copy of a
   thing that already exists is not an improvement, and the aggregation story — a future
   control plane reading `evidence/0` from many repositories — depends on every repo
-  emitting the *same* contract.
+  emitting the _same_ contract.
 
 - **Option D — Do nothing; keep the documented tiers.** Zero cost, zero enforcement.
   Rejected: the documented pipeline was the thing that did not work. Governance that

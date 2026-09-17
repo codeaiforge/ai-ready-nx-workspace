@@ -28,7 +28,9 @@ const TITLE_RE = /^#\s*ADR-(\d{4})\b/m;
 const problems = [];
 const seen = new Map();
 
-const files = readdirSync(DIR).filter((f) => FILE_RE.test(f)).sort();
+const files = readdirSync(DIR)
+  .filter((f) => FILE_RE.test(f))
+  .sort();
 for (const file of files) {
   const num = Number(FILE_RE.exec(file)[1]);
   // 0000 is the reserved template, deliberately outside every block.
@@ -36,7 +38,9 @@ for (const file of files) {
 
   const prev = seen.get(num);
   if (prev) {
-    problems.push(`ADR-${String(num).padStart(4, '0')} is used twice: ${prev} and ${file}`);
+    problems.push(
+      `ADR-${String(num).padStart(4, '0')} is used twice: ${prev} and ${file}`
+    );
   } else {
     seen.set(num, file);
   }
@@ -48,13 +52,20 @@ for (const file of files) {
   } else if (Number(title[1]) !== num) {
     // A renamed file whose title was not renamed still reads as the old ADR
     // everywhere the title is quoted.
-    problems.push(`${file}: filename says ${num}, title says ${Number(title[1])}`);
+    problems.push(
+      `${file}: filename says ${num}, title says ${Number(title[1])}`
+    );
   }
 
   if (!BLOCKS.some((b) => num >= b.from && num <= b.to)) {
     problems.push(
-      `${file}: ADR-${String(num).padStart(4, '0')} is outside every declared block ` +
-        `(${BLOCKS.map((b) => `${b.from}-${b.to}`).join(', ')}) — see .ai/standards/adr.md`
+      `${file}: ADR-${String(num).padStart(
+        4,
+        '0'
+      )} is outside every declared block ` +
+        `(${BLOCKS.map((b) => `${b.from}-${b.to}`).join(
+          ', '
+        )}) — see .ai/standards/adr.md`
     );
   }
 }

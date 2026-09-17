@@ -9,11 +9,11 @@ map by hand — it generates it from the Nx project graph on every run
 
 Two inputs, two different kinds of truth:
 
-| Map field         | Where it comes from            | Who can change it                    |
-| ----------------- | ------------------------------ | ------------------------------------ |
-| `match` (paths)   | project `root` / `sourceRoot`  | computed — moving a project moves it |
-| `shared` (fan-in) | inverted dependency edges      | computed — nobody sets it            |
-| `criticality`     | a `criticality:` project tag   | **declared, and reviewed in the PR** |
+| Map field         | Where it comes from           | Who can change it                    |
+| ----------------- | ----------------------------- | ------------------------------------ |
+| `match` (paths)   | project `root` / `sourceRoot` | computed — moving a project moves it |
+| `shared` (fan-in) | inverted dependency edges     | computed — nobody sets it            |
+| `criticality`     | a `criticality:` project tag  | **declared, and reviewed in the PR** |
 
 That split is deliberate. Topology is a fact about the graph and a machine should read
 it. Business criticality is a judgement about consequences, and no graph knows it — a
@@ -82,7 +82,7 @@ it is not worked around here.
 
 ## Paths that are not Nx projects
 
-This workspace is mostly *not* Nx projects: `.ai/`, `docs/`, `.github/`, the agent
+This workspace is mostly _not_ Nx projects: `.ai/`, `docs/`, `.github/`, the agent
 folders and the root config are the substance of it. Those are declared in a short table
 (`WORKSPACE_COMPONENTS`) in the generator, reviewed in the pull request that changes it —
 the same human checkpoint the tags get, for paths the project graph does not model.

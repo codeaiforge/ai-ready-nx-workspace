@@ -39,7 +39,7 @@ jobs:
           # is the base branch. refs/pull/N/head rather than the head sha, because it
           # exists in this repository even when the pull request comes from a fork.
           # Full history, because the tier is computed against the merge base.
-          ref: "refs/pull/${{ github.event.pull_request.number }}/head"
+          ref: 'refs/pull/${{ github.event.pull_request.number }}/head'
           fetch-depth: 0
 
       - uses: actions/setup-go@v5

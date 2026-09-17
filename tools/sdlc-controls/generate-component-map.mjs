@@ -122,7 +122,9 @@ export function fanIn(graph) {
     if (!projects.has(source)) continue;
     // One source counts once per target, however many files carry the import.
     const targets = new Set(
-      (edges ?? []).map((e) => e.target).filter((t) => projects.has(t) && t !== source)
+      (edges ?? [])
+        .map((e) => e.target)
+        .filter((t) => projects.has(t) && t !== source)
     );
     for (const t of targets) counts.set(t, counts.get(t) + 1);
   }
@@ -144,11 +146,17 @@ export function criticalityOf(name, tags = []) {
     .map((t) => t.slice('criticality:'.length));
   if (declared.length === 0) return DEFAULT_CRITICALITY;
   if (declared.length > 1) {
-    throw new Error(`project "${name}" declares several criticality tags: ${declared.join(', ')}`);
+    throw new Error(
+      `project "${name}" declares several criticality tags: ${declared.join(
+        ', '
+      )}`
+    );
   }
   if (!CRITICALITIES.includes(declared[0])) {
     throw new Error(
-      `project "${name}": criticality "${declared[0]}" is not one of ${CRITICALITIES.join('|')}`
+      `project "${name}": criticality "${
+        declared[0]
+      }" is not one of ${CRITICALITIES.join('|')}`
     );
   }
   return declared[0];
@@ -160,11 +168,14 @@ export function matchesFor(name, data) {
   if (root === '' || root === '.') {
     // A root project's glob would be `**`, which claims every path in the
     // repository and would silently swallow every other component's matches.
-    throw new Error(`project "${name}" has root "${data.root}": a root project cannot be mapped to a path glob`);
+    throw new Error(
+      `project "${name}" has root "${data.root}": a root project cannot be mapped to a path glob`
+    );
   }
   const matches = [`${root}/**`];
   const src = (data.sourceRoot ?? '').replace(/^\.\//, '').replace(/\/+$/, '');
-  if (src && src !== root && !src.startsWith(`${root}/`)) matches.push(`${src}/**`);
+  if (src && src !== root && !src.startsWith(`${root}/`))
+    matches.push(`${src}/**`);
   return matches;
 }
 
@@ -189,7 +200,9 @@ export function buildComponentMap(graph) {
   const clash = ids.find((id, i) => ids.indexOf(id) !== i);
   if (clash) {
     // The binary rejects a duplicate id anyway; say which kind of clash it is.
-    throw new Error(`component id "${clash}" is declared twice: an Nx project collides with a workspace component`);
+    throw new Error(
+      `component id "${clash}" is declared twice: an Nx project collides with a workspace component`
+    );
   }
 
   return { version: 1, defaults: { ...DEFAULTS }, components };
@@ -226,7 +239,8 @@ function main(argv) {
     throw new Error(`cannot read ${path} — run: pnpm nx graph --file=${path}`);
   }
   const { graph } = JSON.parse(raw);
-  if (!graph) throw new Error(`${path} has no "graph" key: not an nx graph export`);
+  if (!graph)
+    throw new Error(`${path} has no "graph" key: not an nx graph export`);
   process.stdout.write(toYaml(buildComponentMap(graph)));
 }
 
