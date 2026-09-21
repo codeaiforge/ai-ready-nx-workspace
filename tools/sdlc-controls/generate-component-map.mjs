@@ -53,6 +53,14 @@ export const WORKSPACE_COMPONENTS = [
       // The commit-msg provenance check. Control machinery: weakening it is how
       // provenance quietly stops being declared.
       '.githooks/**',
+      // The bootstrap decides what gate other repositories get, and the drift check is
+      // what stops it shipping a weaker one than this repo runs. A defect here is not
+      // contained by this repository, so it is tiered like the gate itself. Narrow on
+      // purpose: scripts/seed-java.sh is demo tooling and stays unmatched.
+      'scripts/bootstrap-ai-governance.sh',
+      'scripts/check-template-drift.sh',
+      'scripts/check-gate-targets.py',
+      'scripts/templates/**',
     ],
     criticality: 'critical',
     shared: false,
