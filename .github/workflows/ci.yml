@@ -40,6 +40,13 @@ jobs:
       # ADR-0001s reached the repo while that rule was prose, so it is checked.
       - run: node tools/adr/check-numbering.mjs
 
+      # scripts/bootstrap-ai-governance.sh installs this workspace's gate and tiered
+      # pipeline into other repositories, reading most files straight from here. Two
+      # carry package-manager placeholders and are re-typed rather than copied, so they
+      # can fall behind; and the .ai/ cluster it ships is a link closure, so a new link
+      # can point at a file the manifest does not install. Both ship silently.
+      - run: ./scripts/check-template-drift.sh
+
       - run: pnpm exec nx format:check --base=origin/main
       - run: pnpm exec nx affected -t lint test build typecheck --base=origin/main
       # NB: affected across an empty workspace is a no-op and exits 0. Once
