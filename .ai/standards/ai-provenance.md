@@ -1,8 +1,14 @@
 # AI Provenance Standard (CAF-SDLC-010)
 
 Every commit an agent produces in this workspace declares that it did, which tool did it,
-and where the work came from. The PR gate reads these declarations and puts them in the
-evidence record; see [`docs/sdlc-controls-integration.md`](../../docs/sdlc-controls-integration.md).
+and where the work came from.
+
+<!-- gate-only:start -->
+
+The PR gate reads these declarations and puts them in the evidence record; see
+[`docs/sdlc-controls-integration.md`](../../docs/sdlc-controls-integration.md).
+
+<!-- gate-only:end -->
 
 This is a **declaration, not a detection**. Nothing here proves a human wrote a commit.
 The point is to make the honest case cheap to record and the dishonest case an explicit,

@@ -48,6 +48,8 @@ new constraints the decision imposes on future work.
 - To reverse a decision, add a new ADR and set the old one's status to
   `Superseded by ADR-MMMM`. The superseded ADR stays in the tree.
 
+<!-- local-only:start -->
+
 ## Number blocks
 
 A stack branch inherits `main`'s ADRs when it merges, so both sets live in one
@@ -55,11 +57,11 @@ A stack branch inherits `main`'s ADRs when it merges, so both sets live in one
 reference to "ADR-0001" then names nothing in particular. The number space is
 partitioned instead:
 
-| Block         | Scope                                                              | Branch                        |
-| ------------- | ------------------------------------------------------------------ | ----------------------------- |
-| `0001`-`0099` | Framework decisions: the governance layer, CI gates, workspace tooling | `main`                        |
-| `0101`-`0199` | Stack decisions for the first stack branch                         | `demo/java-spring-payment-reconciliation` |
-| `0201`-`0299` | Stack decisions for the next stack branch                          | a future demo                 |
+| Block         | Scope                                                                  | Branch                                    |
+| ------------- | ---------------------------------------------------------------------- | ----------------------------------------- |
+| `0001`-`0099` | Framework decisions: the governance layer, CI gates, workspace tooling | `main`                                    |
+| `0101`-`0199` | Stack decisions for the first stack branch                             | `demo/java-spring-payment-reconciliation` |
+| `0201`-`0299` | Stack decisions for the next stack branch                              | a future demo                             |
 
 These are all ADRs — same template, same lifecycle, same standard. Only the scope
 of the decision differs, so the identifier stays `ADR-NNNN` and the block carries
@@ -84,6 +86,8 @@ The stack ADRs were renumbered once into `0101`-`0105` when the blocks were
 introduced, at a point where the repository had no forks and no outside
 contributors. That exception is recorded here so it reads as a decision rather
 than as precedent: after this, supersede.
+
+<!-- local-only:end -->
 
 ## Approval
 

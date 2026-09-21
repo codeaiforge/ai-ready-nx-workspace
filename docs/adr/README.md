@@ -12,12 +12,16 @@ To create a new ADR, copy [`0000-template.md`](0000-template.md), rename it to t
 free number **within your branch's block** (`NNNN-short-slug.md`, real ADRs start at
 `0001`), and fill it in.
 
+<!-- local-only:start -->
+
 Numbers are partitioned so a stack branch that merges `main` does not end up with two
 `ADR-0001`s: `0001`-`0099` is `main`'s, for framework decisions; `0101`-`0199` belongs to
 the first stack branch, and so on. They are all ADRs — the block carries the scope, not a
 different document type. The table lives in
 [`.ai/standards/adr.md`](../../.ai/standards/adr.md) and is enforced by
 `node tools/adr/check-numbering.mjs`.
+
+<!-- local-only:end -->
 
 ## Conventions
 

@@ -42,6 +42,8 @@ The full convention, and what the gate does with it, is
 [`.ai/standards/ai-provenance.md`](.ai/standards/ai-provenance.md) — read that, do not
 work from this summary.
 
+<!-- gate-only:start -->
+
 # The PR gate
 
 Pull requests are tiered `T0`–`T3` by `git-native-sdlc-controls@v0.2.0`. The tier is the
@@ -55,3 +57,5 @@ pnpm nx graph --file=/tmp/graph.json
 node tools/sdlc-controls/generate-component-map.mjs /tmp/graph.json > /tmp/components.yaml
 sdlc-controls tier --base origin/main --head HEAD --config /tmp/components.yaml
 ```
+
+<!-- gate-only:end -->
