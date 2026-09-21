@@ -5,7 +5,11 @@ It now does: every pull request is tiered by
 [`git-native-sdlc-controls@v0.2.0`](https://github.com/codeaiforge/git-native-sdlc-controls)
 and emits a schema-valid `evidence/0` record.
 
+<!-- local-only:start -->
+
 Decision and rationale: [ADR-0001](adr/0001-adopt-git-native-sdlc-controls.md).
+
+<!-- local-only:end -->
 
 ## How it runs
 
@@ -17,9 +21,9 @@ but an empty set.
 ```
 checkout refs/pull/N/head (fetch-depth: 0, the tier is computed against the merge base)
   → go install sdlc-controls@v0.2.0
-  → pnpm install
+  → pnpm install --frozen-lockfile
   → node --test tools/sdlc-controls/*.test.mjs        (the adapter, before it is trusted)
-  → pnpm nx graph --file=$RUNNER_TEMP/graph.json
+  → pnpm exec nx graph --file=$RUNNER_TEMP/graph.json
   → node generate-component-map.mjs > $RUNNER_TEMP/components.yaml
   → sdlc-controls binding --config …                  (the policy the decision is under)
   → gh api …/reviews → approver list
@@ -106,7 +110,7 @@ Read it before arguing with the tier.
 ## AI provenance
 
 Agent-authored commits carry CAF-SDLC-010 trailers, so the evidence record attributes
-them. Convention and enforcement: [`.ai/standards/ai-provenance.md`](../../.ai/standards/ai-provenance.md).
+them. Convention and enforcement: [`.ai/standards/ai-provenance.md`](../.ai/standards/ai-provenance.md).
 
 At **T3** the independent-approver control (CAF-SDLC-011) means an AI-authored change
 cannot merge on its author's own approval. Note the precise scope, because it is easy to
