@@ -33,7 +33,7 @@ Also read `docs/specs/mvp-requirements.md` to resolve the Trace column to full r
 
 ### Load Stack Profile
 
-Read `docs/specs/stack.md` — the active stack profile. It defines the language/framework commands and per-layer conventions this pipeline invokes by reference (validation, data access, migrations, access control, module structure, auth, dependency audit, deploy). Wherever a phase below names a concrete command or convention, use the value from the stack profile. If a referenced field is marked `N/A`, skip that check. If `docs/specs/stack.md` is missing, **STOP** and ask the user to create it from `docs/specs/stack-template.md`.
+Read `docs/specs/stack.md` — the active stack profile. It defines the language/framework commands and per-layer conventions this pipeline invokes by reference (validation, data access, migrations, access control, module structure, auth, dependency audit, deploy). Wherever a phase below names a concrete command or convention, use the value from the stack profile. If a referenced field is marked `N/A`, skip that check. If it is marked `Not selected`, do **not** skip it — report it as a finding naming the task that owns the decision, because an outstanding decision is not an exemption. A field that is missing or blank is not an exemption either: treat it as `Not selected` with nobody named. If `docs/specs/stack.md` is missing, **STOP** and ask the user to create it from `docs/specs/stack-template.md`.
 
 ### Load Lessons Learned
 

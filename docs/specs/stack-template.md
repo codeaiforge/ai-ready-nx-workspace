@@ -35,7 +35,8 @@ The pipeline calls these by name. Fill each with the concrete command for this s
 
 ## Conventions (per layer)
 
-Fill each; mark `N/A` for layers this stack does not have (the pipeline skips N/A checks).
+Fill each. Mark `N/A` for a layer this stack does not have, and `Not selected` for one it
+has but has not decided — the pipeline skips the first and surfaces the second.
 
 | Concern | This stack's mechanism |
 | ------- | ---------------------- |
@@ -58,6 +59,12 @@ Fill each; mark `N/A` for layers this stack does not have (the pipeline skips N/
 
 ## Notes
 
-- Any command or convention above that the pipeline references but is left blank or `N/A`
-  causes the corresponding phase check to be **skipped**, not failed. Do not delete rows —
-  mark them `N/A` so the pipeline can tell "not applicable" from "not yet filled in".
+- Every row needs a value, and three kinds count as one:
+  - a concrete command or convention;
+  - `N/A — <why>`: the check does not apply to this stack, so the pipeline **skips** it;
+  - `Not selected — <who decides it>`: it applies and is undecided, so the pipeline
+    **surfaces** it instead. An outstanding decision is a finding, not an exemption, and
+    collapsing the two into `N/A` is how a decision nobody made becomes a check nobody runs.
+- Do not delete a row, and do not leave one blank. A deleted row cannot be looked up by the
+  name a phase reads, and a blank one is indistinguishable from both markers above. Either
+  way the phase check is skipped in silence, which is the one thing none of the three mean.
