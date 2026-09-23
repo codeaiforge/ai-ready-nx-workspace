@@ -4,27 +4,36 @@ Defines the 8-phase SDLC pipeline that every task flows through. The emitted ris
 
 ## Tier authority
 
-The tier is **computed, not declared**. `sdlc-controls` tiers each pull request `T0`-`T3`
-from the change's blast radius and emits it in an `evidence/0` record; the pipeline reads
-that record. Nobody on the change selects its own tier.
+Where the `sdlc-controls` gate is installed the tier is **computed, not declared**:
+`sdlc-controls` tiers each pull request `T0`-`T3` from the change's blast radius and emits
+it in an `evidence/0` record; the pipeline reads that record, and nobody on the change
+selects its own tier. Without the gate there is no record to read, and
+`run-task.prompt.md` classifies by story points — the weaker proxy the rest of this
+section is about.
 
-| Evidence tier | Pipeline                                        | Active phases   |
-| ------------- | ----------------------------------------------- | --------------- |
-| `T0`          | [Light](tier-light.md)                          | ① ③ ④ ⑧         |
-| `T1`          | [Standard](tier-standard.md)                    | ① ② ③ ④ ⑤ ⑧     |
-| `T2`          | [Standard](tier-standard.md) + Phase ⑥          | ① ② ③ ④ ⑤ ⑥ ⑧   |
-| `T3`          | [Complex](tier-complex.md)                      | ① - ⑧           |
+| Evidence tier | Pipeline                               | Active phases |
+| ------------- | -------------------------------------- | ------------- |
+| `T0`          | [Light](tier-light.md)                 | ① ③ ④ ⑧       |
+| `T1`          | [Standard](tier-standard.md)           | ① ② ③ ④ ⑤ ⑧   |
+| `T2`          | [Standard](tier-standard.md) + Phase ⑥ | ① ② ③ ④ ⑤ ⑥ ⑧ |
+| `T3`          | [Complex](tier-complex.md)             | ① - ⑧         |
 
 Story points size **effort**. They never measured **risk**, and using them as a risk
 proxy is what let a one-point change to an authentication module travel the Light path.
-Estimate in points; let the gate set the tier.
+Estimate in points; let the gate set the tier. A repository running without the gate is
+on that weaker proxy by necessity, not by choice — installing the gate is what replaces
+it.
 
 Phase ⑥ Security remains an independent escalation: any task touching authentication,
 authorization, database or AI runs it whatever the gate emits. The gate reads paths, and
 a change can be dangerous for reasons no path reveals. Take the stricter of the two.
 
+<!-- gate-only:start -->
+
 How to read the tier, and what the gate does not claim:
 [docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md).
+
+<!-- gate-only:end -->
 
 ## Phases
 

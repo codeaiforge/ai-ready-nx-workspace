@@ -4,16 +4,24 @@
 
 ## Selected by
 
-**Evidence tier `T0`.** The tier is computed by `sdlc-controls` and read from the pull
-request's evidence record — it is not declared here, and not inferred from story points.
+**Evidence tier `T0`** where the `sdlc-controls` gate is installed. The tier is computed
+from the change's blast radius and read from the pull request's evidence record — not
+declared here, and not inferred from story points. Without the gate there is no evidence
+record: `run-task.prompt.md` classifies by story points instead, and this file is the
+procedure for the class it picks.
+
+<!-- gate-only:start -->
+
 See [docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md).
+
+<!-- gate-only:end -->
 
 - **Emitted tier**: `T0` — every affected component is `criticality:low`, with no
   escalation for fan-in, breadth or unmatched paths
 - **Required by the tier**: 1 approver, lint
 - **Typical tasks**: Schema definition, barrel export, config file, simple component, type definition, documentation update
 - **Phase count**: 4
-- **Story points**: a planning estimate for effort. They do not select this pipeline.
+- **Story points**: 1–2 SP. A planning estimate for effort. With the gate installed they do not select this pipeline; without it they are the only signal there is.
 
 ## Escalation
 

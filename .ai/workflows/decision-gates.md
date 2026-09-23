@@ -20,12 +20,13 @@ Every project should define 2-4 decision gates aligned to major milestones. Each
 
 **Evaluating agents**: {Role 1} + {Role 2} + {Role 3}
 
-| Signal | Go | No-Go |
-| ------ | -- | ----- |
+| Signal     | Go                     | No-Go                    |
+| ---------- | ---------------------- | ------------------------ |
 | {Metric 1} | {Acceptable threshold} | {Unacceptable threshold} |
 | {Metric 2} | {Acceptable threshold} | {Unacceptable threshold} |
 
 **No-go actions**:
+
 1. {Specific remediation step}
 2. {Fallback plan}
 ```
@@ -36,11 +37,11 @@ Every project should define 2-4 decision gates aligned to major milestones. Each
 
 **Purpose**: Validate that the primary user workflow functions end-to-end before building secondary features.
 
-| Signal | Go | No-Go |
-| ------ | -- | ----- |
+| Signal        | Go                    | No-Go                     |
+| ------------- | --------------------- | ------------------------- |
 | Critical bugs | 0 critical, < 5 minor | Any critical or > 5 minor |
-| Timeline | On schedule | > 1 week behind |
-| Core workflow | End-to-end functional | Any step broken |
+| Timeline      | On schedule           | > 1 week behind           |
+| Core workflow | End-to-end functional | Any step broken           |
 
 **No-go actions**: Redirect next iteration to bug fixes and stability. Defer secondary features.
 
@@ -50,12 +51,12 @@ Every project should define 2-4 decision gates aligned to major milestones. Each
 
 **Evaluating agents**: Business Analyst + QA + Security + DevOps
 
-| Signal | Go | No-Go |
-| ------ | -- | ----- |
-| Security | No Critical/High findings | Any Critical/High unresolved |
-| Performance | Meets NFR targets | Key metrics out of range |
-| Accessibility | WCAG 2.1 AA compliant | Blocking a11y issues |
-| Test coverage | Meets team standards | Below minimum threshold |
+| Signal        | Go                        | No-Go                        |
+| ------------- | ------------------------- | ---------------------------- |
+| Security      | No Critical/High findings | Any Critical/High unresolved |
+| Performance   | Meets NFR targets         | Key metrics out of range     |
+| Accessibility | WCAG 2.1 AA compliant     | Blocking a11y issues         |
+| Test coverage | Meets team standards      | Below minimum threshold      |
 
 **No-go actions**: Extend iteration for targeted fixes. Release with documented known issues if non-critical.
 

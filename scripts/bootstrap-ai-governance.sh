@@ -271,15 +271,6 @@ guidance, but they must not restate architectural decisions, boundaries, or gove
 rules that belong in higher authority layers.
 EOF
 
-if ! "$with_sdlc_controls"; then
-  install_template .ai/workflows/README.md <<'EOF'
-# Workflows
-
-Put repository-wide delivery and review workflows here. Keep tool commands in the
-relevant adapter or task playbook, while keeping the workflow's policy tool-neutral.
-EOF
-fi
-
 IFS=',' read -r -a adapter_list <<< "$adapters"
 for adapter in "${adapter_list[@]}"; do
   adapter=$(printf '%s' "$adapter" | tr -d '[:space:]')
@@ -337,13 +328,6 @@ if "$with_sdlc_controls"; then
   install_template_file tools/sdlc-controls/README.md "$source_root/tools/sdlc-controls/README.md"
   install_template_file config/sdlc-controls/criticality-tags.md "$source_root/config/sdlc-controls/criticality-tags.md"
   install_rendered docs/sdlc-controls-integration.md "$template_root/integration.md"
-
-  # The gate emits a tier; these say what to do at each one. Without them a target
-  # gets a pipeline that classifies every pull request and no procedure for any of
-  # them. The set is the transitive link closure of the tier workflows, so nothing
-  # installed here points at a file that was left behind. Shipped verbatim: the
-  # `{placeholder}` tokens are the cluster's own documented fill-ins, listed for the
-  # reader in .ai/workflows/README.md and .ai/prompts/README.md.
 fi
 
 
@@ -369,7 +353,14 @@ install_template_file tools/adr/check-numbering.mjs "$source_root/tools/adr/chec
 # The manifest is derived from this repository rather than listed, so a governance
 # file added here reaches bootstrapped repositories without editing this script.
 #
-# Two lists carve out the exceptions. Both are short on purpose: a file that needs an
+# That includes .ai/workflows/ whether or not the gate ships. run-task.prompt.md and
+# sprint-conductor.prompt.md read those files by name, so withholding them left an
+# installed prompt pointing at phase definitions the target does not have — and a
+# missing file is not an error an agent reports, it is one it improvises around. The
+# paragraphs that only make sense with the gate are bracketed <!-- gate-only --> and
+# stripped by marker_filter instead, which is what that marker is for.
+#
+# One list carves out the exceptions. It is short on purpose: a file that needs an
 # entry is usually a file that should have been written to be portable.
 ai_never_ships=(
   # Documents this script, which the target does not have.
@@ -379,19 +370,6 @@ ai_never_ships=(
   # Documents formats owned by .github/prompts/, so it ships only with the adapter
   # content that brings that store along — see the adapter block below.
   .ai/sprints/README.md
-)
-
-# Meaningless without the gate: each tier file is "what to do when the gate says
-# T0/T1/T2/T3" and links to its integration doc. Installing them alone would ship
-# dangling links.
-ai_needs_gate=(
-  .ai/workflows/README.md
-  .ai/workflows/decision-gates.md
-  .ai/workflows/sprint-conductor.md
-  .ai/workflows/task-pipeline.md
-  .ai/workflows/tier-complex.md
-  .ai/workflows/tier-light.md
-  .ai/workflows/tier-standard.md
 )
 
 contains() {
@@ -404,9 +382,6 @@ contains() {
 while IFS= read -r -d '' source; do
   relative=${source#"$source_root/"}
   contains "$relative" "${ai_never_ships[@]}" && continue
-  if contains "$relative" "${ai_needs_gate[@]}" && ! "$with_sdlc_controls"; then
-    continue
-  fi
   install_template_file "$relative" "$source"
 done < <(find "$source_root/.ai" -name '*.md' -print0 | sort -z)
 

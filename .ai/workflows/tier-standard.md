@@ -4,13 +4,21 @@
 
 ## Selected by
 
-**Evidence tier `T1` or `T2`.** The tier is computed by `sdlc-controls` and read from the
-pull request's evidence record — it is not declared here, and not inferred from story
-points. See [docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md).
+**Evidence tier `T1` or `T2`** where the `sdlc-controls` gate is installed. The tier is
+computed from the change's blast radius and read from the pull request's evidence record
+— not declared here, and not inferred from story points. Without the gate there is no
+evidence record: `run-task.prompt.md` classifies by story points instead, and this file is
+the procedure for the class it picks.
 
-| Emitted tier | Pipeline                  | Required by the tier                          |
-| ------------ | ------------------------- | --------------------------------------------- |
-| `T1`         | the six phases below      | 1 approver; lint, sast                        |
+<!-- gate-only:start -->
+
+See [docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md).
+
+<!-- gate-only:end -->
+
+| Emitted tier | Pipeline                        | Required by the tier                            |
+| ------------ | ------------------------------- | ----------------------------------------------- |
+| `T1`         | the six phases below            | 1 approver; lint, sast                          |
 | `T2`         | the six phases **+ ⑥ Security** | owning-team reviewer; lint, sast, secrets, deps |
 
 `T2` adds Phase ⑥ because the tier itself demands secrets and dependency scanning — the
@@ -18,7 +26,7 @@ work Phase ⑥ does. It is the same pipeline otherwise.
 
 - **Typical tasks**: Database migration, API endpoint, feature slice, CI pipeline, database library
 - **Phase count**: 6 (`T1`), 7 (`T2`)
-- **Story points**: a planning estimate for effort. They do not select this pipeline.
+- **Story points**: 3 SP. A planning estimate for effort. With the gate installed they do not select this pipeline; without it they are the only signal there is.
 
 ## Escalation
 

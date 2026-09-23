@@ -4,9 +4,17 @@ Full 8-phase pipeline for changes the gate tiers `T3`. All phases active includi
 
 ## Selected by
 
-**Evidence tier `T3`.** The tier is computed by `sdlc-controls` and read from the pull
-request's evidence record — it is not declared here, and not inferred from story points.
+**Evidence tier `T3`** where the `sdlc-controls` gate is installed. The tier is computed
+from the change's blast radius and read from the pull request's evidence record — not
+declared here, and not inferred from story points. Without the gate there is no evidence
+record: `run-task.prompt.md` classifies by story points instead, and this file is the
+procedure for the class it picks.
+
+<!-- gate-only:start -->
+
 See [docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md).
+
+<!-- gate-only:end -->
 
 - **Emitted tier**: `T3` — a `criticality:critical` component is affected, or a lower tier
   escalated to the cap via fan-in, breadth or an undeclared path
@@ -14,7 +22,7 @@ See [docs/sdlc-controls-integration.md](../../docs/sdlc-controls-integration.md)
   owning-team reviewer, change-advisory deploy approval; lint, sast, secrets, deps
 - **Typical tasks**: OAuth/SSO setup, AI/ML pipeline, real-time/streaming architecture, compliance features, cross-cutting infrastructure changes
 - **Phase count**: 8
-- **Story points**: a planning estimate for effort. They do not select this pipeline.
+- **Story points**: 5–8 SP. A planning estimate for effort. With the gate installed they do not select this pipeline; without it they are the only signal there is.
 
 At `T3` the gate blocks a change approved only by its own author, AI-authored or not.
 That is segregation of duties between two forge accounts — not a claim that a second
