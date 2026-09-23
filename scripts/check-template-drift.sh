@@ -55,6 +55,14 @@ mkdir -p "$workdir/nx-nogate"
 "$root/scripts/bootstrap-ai-governance.sh" \
   --target "$workdir/nx-nogate" --kind nx --package-manager pnpm --apply >/dev/null
 
+# The gate without a graph: the map is committed rather than projected, so the workflow
+# and the integration doc take their <!-- generic-only --> branch. Link-checked like the
+# rest -- that branch names config/sdlc-controls/components.yaml, which only this
+# profile installs.
+mkdir -p "$workdir/generic-gate"
+"$root/scripts/bootstrap-ai-governance.sh" \
+  --target "$workdir/generic-gate" --kind generic --with-sdlc-controls --apply >/dev/null
+
 status=0
 for name in "${!live[@]}"; do
   path=${live[$name]}
@@ -63,8 +71,12 @@ for name in "${!live[@]}"; do
   [[ -f "$root/$path" ]] || { printf 'error: missing original: %s\n' "$path" >&2; exit 1; }
   # The rendered copy has its <!-- local-only --> blocks stripped, so strip them from
   # the original too: the diff is about the template falling behind, not about that.
+  # Markdown is squeezed on both sides for the same reason the bootstrap squeezes it --
+  # removing a block leaves the blank lines that flanked it adjacent.
+  squeeze=cat
+  [[ "$path" == *.md ]] && squeeze='cat -s'
   if ! diff -u --label "$path" --label "rendered from scripts/templates/sdlc-controls/$name" \
-       <(sed '/<!-- local-only:start -->/,/<!-- local-only:end -->/d' "$root/$path") \
+       <(sed '/<!-- local-only:start -->/,/<!-- local-only:end -->/d' "$root/$path" | $squeeze) \
        "$rendered/$path"; then
     printf '\nscripts/templates/sdlc-controls/%s no longer matches %s.\n' "$name" "$path" >&2
     printf 'Port the change by hand: it carries __INSTALL__/__NX__/__CACHE__/__DLX__\n' >&2
@@ -73,17 +85,23 @@ for name in "${!live[@]}"; do
   fi
 done
 
+# A template with no counterpart in this repository, because this repository does not
+# take that profile. The committed component map goes to a target with no project graph
+# to project one from; here the map is generated per run, so there is nothing to diff
+# it against. It is still installed and link-checked, through the generic-gate profile.
+declare -A no_original=([components.yaml]=1)
+
 # A template under scripts/templates/ that nothing installs is dead weight, and one
 # with no entry above is unchecked. Both are failures rather than skips.
 while IFS= read -r -d '' template; do
   name=$(basename "$template")
-  [[ -v live[$name] ]] || {
+  [[ -v live[$name] || -v no_original[$name] ]] || {
     printf 'error: scripts/templates/sdlc-controls/%s has no entry in this script.\n' "$name" >&2
     exit 1
   }
 done < <(find "$root/scripts/templates" -type f -print0)
 
-python3 - "$rendered" "$workdir/default" "$workdir/nx-nogate" <<'PY' || status=1
+python3 - "$rendered" "$workdir/default" "$workdir/nx-nogate" "$workdir/generic-gate" <<'PY' || status=1
 import re, sys, pathlib
 
 targets = [pathlib.Path(a).resolve() for a in sys.argv[1:]]

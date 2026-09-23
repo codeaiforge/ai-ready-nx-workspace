@@ -1,0 +1,27 @@
+# Component map for git-native-sdlc-controls (CAF-SDLC-002).
+#
+# This file decides how much scrutiny every change to this repository gets, so the
+# binary's map-governance rule treats editing it as a top-tier change: a pull request
+# touching this file is tiered T3 whatever else it does.
+#
+# It ships with one catch-all component, which tiers every change alike. That is a
+# starting line, not a map. Split it as the repository takes shape -- one component per
+# independently deployed or independently owned thing -- and the tier starts tracking
+# blast radius instead of tracking nothing.
+#
+#   match        globs; `*` within a path segment, `**` across segments
+#   criticality  low | medium | high | critical -- the tier floor, T0..T3
+#   shared       true when many callers depend on it; escalates one tier
+#   owners       team handles, reported from T2 upward for CODEOWNERS to enforce
+version: 1
+defaults:
+  # A path no component claims is tiered here rather than ignored, so narrowing the
+  # globs below is safe on its own: whatever stops being covered escalates instead.
+  unmatched_path_tier: high
+  # Affected components at which breadth alone escalates the tier.
+  breadth_threshold: 4
+components:
+  - id: repository
+    match: ['**']
+    criticality: medium
+    shared: false

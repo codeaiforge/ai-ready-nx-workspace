@@ -58,6 +58,8 @@ proves the pin held all the way through.
 
 ## Where the component map comes from
 
+<!-- nx-only:start -->
+
 Generated per run from the Nx project graph, never committed. See
 [`tools/sdlc-controls/README.md`](../tools/sdlc-controls/README.md) and
 [`config/sdlc-controls/criticality-tags.md`](../config/sdlc-controls/criticality-tags.md).
@@ -68,6 +70,26 @@ somebody forgot to flag it — which is the binary's stated ceiling for a hand-m
 map. Criticality is still a human input. It is now a reviewed project tag instead of a
 hand-edited YAML entry, which is better, but it is not automatic and this document does
 not claim it is.
+
+<!-- nx-only:end -->
+<!-- generic-only:start -->
+
+Committed at [`config/sdlc-controls/components.yaml`](../config/sdlc-controls/components.yaml)
+and reviewed like any other file.
+
+The honest summary: **topology and criticality are both declared.** That is the
+binary's documented ceiling, in full — a component whose real callers changed does not
+re-tier until somebody edits the map, and a high fan-in component nobody marked
+`shared: true` is under-tiered. Two things keep the approximation from going quiet:
+`unmatched_path_tier` escalates any path no component claims, so the map failing to
+keep up with the repository raises the tier rather than lowering it; and editing the map
+self-escalates to T3, so the file deciding scrutiny is the most scrutinised file here.
+
+The map ships with a single catch-all component, which tiers every change alike. Split
+it — one component per independently deployed or independently owned thing — or the
+gate is measuring nothing but the fact that a change exists.
+
+<!-- generic-only:end -->
 
 ## Tier reconciliation — `T0`–`T3` is the risk tier
 
@@ -130,6 +152,8 @@ The fix is branch protection, not more workflow: require pull requests on `main`
 make `sdlc-controls / controls` a required check. Until that is set, the gate is
 advisory for anyone with push access.
 
+<!-- nx-only:start -->
+
 ### Map governance cannot fire here
 
 CAF-SDLC-002 self-escalates any change that edits the component map, on the principle
@@ -153,6 +177,19 @@ The map emits no `owners`, because Nx has no owners concept in this workspace an
 is no `CODEOWNERS` file. At T2 and above the binary warns that it cannot verify an
 owning-team reviewer and names no owners. When `CODEOWNERS` exists, map it into the
 generator and the warning becomes useful.
+
+<!-- nx-only:end -->
+<!-- generic-only:start -->
+
+### Owners are declared, not verified
+
+The map has an `owners` field and it ships empty. Fill it in and the binary reports the
+owning teams of the affected components from T2 upward — as a warning, not a check. It
+will not expand a team handle into its members, because that needs a forge API it
+declines to depend on. `CODEOWNERS` plus branch protection is what actually enforces an
+owning-team reviewer; the record names who it should have been.
+
+<!-- generic-only:end -->
 
 ## Findings against the map schema
 

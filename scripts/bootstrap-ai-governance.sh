@@ -35,11 +35,13 @@ Options:
   --kind auto|nx|generic    Authority-1 model (default: auto; detects nx.json)
   --adapters LIST           Comma-separated adapters: codex, claude, gemini,
                             cursor, opencode, copilot (default: codex)
-  --with-sdlc-controls      Also install the Nx-backed GitHub PR risk gate, its graph
-                            adapter and hook, the provenance standard it enforces, and
-                            the tiered pipeline it selects (.ai/workflows/).
+  --with-sdlc-controls      Also install the GitHub PR risk gate and the provenance
+                            standard it enforces. With --kind nx the component map is
+                            projected from the project graph per run; otherwise a
+                            starter map is committed at
+                            config/sdlc-controls/components.yaml for you to split.
   --package-manager NAME    npm or pnpm for the generated GitHub workflow
-                            (default: auto-detect)
+                            (--kind nx only; default: auto-detect)
   --apply                   Write the planned files
   --check                   Read-only: exit non-zero if any managed file is
                             missing or differs. For a bootstrapped repo's CI.
@@ -51,6 +53,8 @@ Examples:
   scripts/bootstrap-ai-governance.sh --target ../service --kind generic \
     --adapters codex,claude --apply
   scripts/bootstrap-ai-governance.sh --target ../nx-workspace --kind nx \
+    --with-sdlc-controls --apply
+  scripts/bootstrap-ai-governance.sh --target ../java-service --kind generic \
     --with-sdlc-controls --apply
 USAGE
 }
@@ -95,11 +99,10 @@ if "$check_only" && "$apply_changes"; then
   die "--check is read-only; do not combine it with --apply"
 fi
 
-if "$with_sdlc_controls" && [[ "$kind" != "nx" ]]; then
-  die "--with-sdlc-controls currently requires --kind nx: its component map is generated from the Nx project graph"
-fi
-
-if "$with_sdlc_controls"; then
+# The package manager is an Nx-profile concern: that profile installs the workspace to
+# run the map generator. A generic target has no manifest to install from, and reaches
+# ajv through `npx --yes`.
+if "$with_sdlc_controls" && [[ "$kind" == "nx" ]]; then
   case "$package_manager" in
     auto)
       if [[ -f "$root/pnpm-lock.yaml" ]] || grep -q '"packageManager"[[:space:]]*:[[:space:]]*"pnpm@' "$root/package.json" 2>/dev/null; then
@@ -155,8 +158,10 @@ install_template() {
 }
 
 # A <!-- local-only --> block cites something only this repository has; a
-# <!-- gate-only --> block explains how the PR gate consumes something. Strip what the
-# target will not have, so no installed file links to a file that was left behind. The
+# <!-- gate-only --> block explains how the PR gate consumes something; <!-- nx-only -->
+# and <!-- generic-only --> are the two ways a component map is produced, and exactly one
+# of them is true of any target. Strip what the target will not have, so no installed
+# file links to a file that was left behind or describes machinery it did not get. The
 # markers themselves never ship.
 marker_filter() {
   local script='/<!-- local-only:start -->/,/<!-- local-only:end -->/d'
@@ -165,13 +170,35 @@ marker_filter() {
   else
     script="$script;/<!-- gate-only:start -->/,/<!-- gate-only:end -->/d"
   fi
+  if [[ "$kind" == "nx" ]]; then
+    script="$script;/<!-- nx-only:\(start\|end\) -->/d"
+    script="$script;/<!-- generic-only:start -->/,/<!-- generic-only:end -->/d"
+  else
+    script="$script;/<!-- nx-only:start -->/,/<!-- nx-only:end -->/d"
+    script="$script;/<!-- generic-only:\(start\|end\) -->/d"
+  fi
   printf '%s' "$script"
+}
+
+# Deleting a conditional block leaves the blank line before it next to the blank line
+# after it. Markdown renders one or two the same, but prettier does not: it wants a
+# blank line on each side of an HTML comment, and a repository that runs it would
+# reformat what this script just wrote. Collapsing the run keeps the marker padded in
+# the source and the output clean. Markdown only -- a run of blank lines is not
+# always noise elsewhere, and .githooks/commit-msg goes through here too.
+emit_template() {
+  local relative=$1
+  if [[ "$relative" == *.md ]]; then
+    install_template "$relative" < <(cat -s)
+  else
+    install_template "$relative" < <(cat)
+  fi
 }
 
 install_template_file() {
   local relative=$1 source=$2
   [[ -f "$source" ]] || die "bootstrap template is missing: $source"
-  install_template "$relative" < <(sed "$(marker_filter)" "$source")
+  sed "$(marker_filter)" "$source" | emit_template "$relative"
 }
 
 install_executable_template_file() {
@@ -183,11 +210,28 @@ install_executable_template_file() {
 }
 
 # Substitutes the target's package manager into a template. __PNPM_ONLY_*__ brackets
-# lines that exist only for pnpm; a file without them is unaffected.
+# lines that exist only for pnpm; a file without them is unaffected. __MAP__ is where the
+# gate reads its component map, which is the one thing the two profiles genuinely
+# disagree about: projected from the graph per run, or committed and reviewed.
 install_rendered() {
   local relative=$1 source=$2
-  local content install_command nx_command dlx_command
+  local content install_command nx_command dlx_command map_path
   [[ -f "$source" ]] || die "bootstrap template is missing: $source"
+  if [[ "$kind" != "nx" ]]; then
+    # Nothing to install and no graph to project. The steps that would have used these
+    # are inside <!-- nx-only --> and are about to be stripped; `npx --yes` fetches ajv
+    # on demand, which is all that is left needing Node.
+    install_command=':'
+    nx_command=':'
+    dlx_command='npx --yes'
+    map_path='config/sdlc-controls/components.yaml'
+    content=$(sed '/__PNPM_ONLY_START__/,/__PNPM_ONLY_END__/d' "$source")
+    content=${content//__MAP__/$map_path}
+    content=${content//__DLX__/$dlx_command}
+    printf '%s\n' "$content" | sed "$(marker_filter)" | emit_template "$relative"
+    return
+  fi
+  map_path='${RUNNER_TEMP}/components.yaml'
   case "$package_manager" in
     pnpm)
       install_command='pnpm install --frozen-lockfile'
@@ -204,11 +248,11 @@ install_rendered() {
       ;;
   esac
   content=${content//__CACHE__/$package_manager}
+  content=${content//__MAP__/$map_path}
   content=${content//__INSTALL__/$install_command}
   content=${content//__NX__/$nx_command}
   content=${content//__DLX__/$dlx_command}
-  content=$(printf '%s\n' "$content" | sed "$(marker_filter)")
-  install_template "$relative" <<< "$content"
+  printf '%s\n' "$content" | sed "$(marker_filter)" | emit_template "$relative"
 }
 
 install_template AGENTS.md <<'EOF'
@@ -323,10 +367,17 @@ done
 if "$with_sdlc_controls"; then
   template_root="$script_dir/templates/sdlc-controls"
   install_rendered .github/workflows/sdlc-controls.yml "$template_root/sdlc-controls.yml.tmpl"
-  install_template_file tools/sdlc-controls/generate-component-map.mjs "$source_root/tools/sdlc-controls/generate-component-map.mjs"
-  install_template_file tools/sdlc-controls/generate-component-map.test.mjs "$source_root/tools/sdlc-controls/generate-component-map.test.mjs"
-  install_template_file tools/sdlc-controls/README.md "$source_root/tools/sdlc-controls/README.md"
-  install_template_file config/sdlc-controls/criticality-tags.md "$source_root/config/sdlc-controls/criticality-tags.md"
+  if [[ "$kind" == "nx" ]]; then
+    install_template_file tools/sdlc-controls/generate-component-map.mjs "$source_root/tools/sdlc-controls/generate-component-map.mjs"
+    install_template_file tools/sdlc-controls/generate-component-map.test.mjs "$source_root/tools/sdlc-controls/generate-component-map.test.mjs"
+    install_template_file tools/sdlc-controls/README.md "$source_root/tools/sdlc-controls/README.md"
+    install_template_file config/sdlc-controls/criticality-tags.md "$source_root/config/sdlc-controls/criticality-tags.md"
+  else
+    # No graph to project a map from, so the map is a committed file -- which the
+    # binary's map-governance rule can then actually see in a diff. Shipped as a
+    # starting point, not a finished map: one catch-all component, to be split.
+    install_template_file config/sdlc-controls/components.yaml "$template_root/components.yaml"
+  fi
   install_rendered docs/sdlc-controls-integration.md "$template_root/integration.md"
 fi
 

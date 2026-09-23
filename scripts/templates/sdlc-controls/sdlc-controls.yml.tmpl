@@ -5,9 +5,16 @@
 # own .github/workflows/controls.yml at v0.2.0 — same binary, same flags, same way
 # of reading the approver set.
 #
+# <!-- nx-only:start -->
 # What is different here: the component map is not a committed file. It is generated
 # per run from the Nx project graph, so topology (paths, fan-in) is computed rather
 # than remembered. See docs/sdlc-controls-integration.md.
+# <!-- nx-only:end -->
+# <!-- generic-only:start -->
+# The component map is config/sdlc-controls/components.yaml, committed and reviewed.
+# Edit it as the repository grows: an undeclared path is tiered by the map's
+# unmatched_path_tier, never ignored. See docs/sdlc-controls-integration.md.
+# <!-- generic-only:end -->
 #
 # Additive: .github/workflows/ci.yml still runs. This gate does not replace it.
 name: sdlc-controls
@@ -52,6 +59,7 @@ jobs:
           go install "github.com/codeaiforge/git-native-sdlc-controls/cmd/sdlc-controls@${SDLC_CONTROLS_VERSION}"
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
+      # <!-- nx-only:start -->
       # __PNPM_ONLY_START__
       - uses: pnpm/action-setup@v4
         # No version here: action-setup@v4 reads "packageManager" from
@@ -92,13 +100,22 @@ jobs:
           echo "::group::generated component map"
           cat "${MAP}"
           echo "::endgroup::"
+      # <!-- nx-only:end -->
+      # <!-- generic-only:start -->
+      # Node is here only for ajv, which validates the evidence record below. There is
+      # no workspace to install: the map is a committed file, so nothing is generated
+      # and no package manifest is assumed to exist.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # <!-- generic-only:end -->
 
       # The map the tier decision is made under, printed alongside the decision.
       # A map the binary rejects fails here, before anything has been tiered.
       - name: Print the active policy binding
         run: |
           set -euo pipefail
-          sdlc-controls binding --config "${RUNNER_TEMP}/components.yaml" | tee "${RUNNER_TEMP}/binding.txt"
+          sdlc-controls binding --config "__MAP__" | tee "${RUNNER_TEMP}/binding.txt"
 
       - name: Collect the approver set
         id: approvers
@@ -143,7 +160,7 @@ jobs:
           sdlc-controls tier \
             --base "origin/${BASE_REF}" \
             --head "${HEAD_SHA}" \
-            --config "${RUNNER_TEMP}/components.yaml" \
+            --config "__MAP__" \
             --change-id "PR-${PR}" \
             --author "${AUTHOR}" \
             --approvers "${APPROVERS}" \
