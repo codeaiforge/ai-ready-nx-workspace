@@ -41,11 +41,19 @@ mkdir -p "$rendered"
   --with-sdlc-controls --apply >/dev/null
 
 # The default profile must stand alone, including on a repository that is not Nx and
-# has no gate: that is the claim it makes, and the ai_needs_gate carve-out in the
-# bootstrap is what keeps it true. Installed and link-checked as its own profile.
+# has no gate: that is the claim it makes. Installed and link-checked as its own profile.
 mkdir -p "$workdir/default"
 "$root/scripts/bootstrap-ai-governance.sh" \
   --target "$workdir/default" --kind generic --apply >/dev/null
+
+# Nx without the gate -- neither of the two above, and the profile a gate-conditional
+# carve-out breaks first: the prompt store ships here (it needs --kind nx) while
+# anything gated does not. Checking only the two diagonal cases let exactly that
+# through once, with run-task.prompt.md naming .ai/workflows/ files no profile in this
+# script installed. Four combinations, three that can differ.
+mkdir -p "$workdir/nx-nogate"
+"$root/scripts/bootstrap-ai-governance.sh" \
+  --target "$workdir/nx-nogate" --kind nx --package-manager pnpm --apply >/dev/null
 
 status=0
 for name in "${!live[@]}"; do
@@ -75,7 +83,7 @@ while IFS= read -r -d '' template; do
   }
 done < <(find "$root/scripts/templates" -type f -print0)
 
-python3 - "$rendered" "$workdir/default" <<'PY' || status=1
+python3 - "$rendered" "$workdir/default" "$workdir/nx-nogate" <<'PY' || status=1
 import re, sys, pathlib
 
 targets = [pathlib.Path(a).resolve() for a in sys.argv[1:]]
@@ -85,11 +93,32 @@ targets = [pathlib.Path(a).resolve() for a in sys.argv[1:]]
 # it never reaches a target to dangle in the first place.
 ALLOWED = set()
 
+# The prompts name governance files in backticks rather than as links -- run-task
+# says "read `.ai/workflows/tier-light.md`" -- so the markdown-link scan above cannot
+# see them, and a carve-out that withheld those files shipped a prompt pointing at
+# nothing. An agent does not report a missing file, it improvises around it.
+#
+# Only `.ai/` paths: everything under it is framework content the bootstrap owns and
+# must supply. A backticked `docs/specs/...` is project content the target authors
+# later, and its absence in a fresh repository is correct. Paths carrying a
+# `{placeholder}` or a glob are patterns, not references.
+BACKTICKED = re.compile(r"`(\.ai/[^`\s]+)`")
+
 dangling = []
 checked = 0
 for target in targets:
     for md in sorted(target.rglob("*.md")):
-        for match in re.finditer(r"\]\(([^)#]+?)(?:#[^)]*)?\)", md.read_text()):
+        body = md.read_text()
+
+        for match in BACKTICKED.finditer(body):
+            named = match.group(1)
+            if "{" in named or "*" in named:
+                continue
+            checked += 1
+            if not (target / named).exists():
+                dangling.append(f"[{target.name}] {md.relative_to(target)} -> {named} (named in backticks)")
+
+        for match in re.finditer(r"\]\(([^)#]+?)(?:#[^)]*)?\)", body):
             href = match.group(1).strip()
             if href.startswith(("http", "mailto", "#")):
                 continue
