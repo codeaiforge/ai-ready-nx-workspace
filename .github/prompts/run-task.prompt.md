@@ -263,6 +263,13 @@ If the gate fails:
    reads: the stack profile's **Affected lint/test/build** command passes over a message that
    describes a fix nobody made. A fix asserted but not made is worse than one never
    attempted, because it closes the finding in the record while leaving the defect in the tree.
+
+   That check proves a fix landed where you put it. It does not prove it landed everywhere the
+   fact is written. **For every fact a fix changes, grep the repository for its old value before
+   presenting the plan** — a dependency stated in a table and again in a wave rationale, a
+   checklist kept in two files, an owner named in one column and a review point in the next. A
+   fact written in two places and fixed in one is not a fix; it is a new contradiction, and the
+   next review cycle will find it.
 3. Re-enter Phase ④ (re-review the fixes)
 4. Maximum 3 review cycles — if still blocked after 3, escalate to user with the pattern of recurring issues
 
